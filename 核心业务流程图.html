@@ -869,7 +869,7 @@
                     P2a --> P2b["旧码失效 → 新码生效"]
                     end
 
-                    subgraph 库位异常["⚠️ 库位异常"]
+                    subgraph LocError[库位异常]
                     C1[部分产品未指定库位] --> C1a["提示「无法计算装车路线」"]
                     C1a --> C1b[联系成品库人员补录warehouse_code]
                     end
@@ -883,67 +883,67 @@
             <div class="mermaid-wrap">
                 <div class="mermaid">
                     sequenceDiagram
-                    participant PC as "结算中心(PC)"
-                    participant MES as "MES后端"
-                    participant U8 as "U8 ERP"
-                    participant Scale as "地磅硬件"
-                    participant Mini as "小程序"
+                    participant PC as 结算中心PC
+                    participant MES as MES后端
+                    participant U8 as U8 ERP
+                    participant Scale as 地磅硬件
+                    participant Mini as 小程序
 
-                    Note over PC,U8: === 阶段1: 创建登记单 (PC端) ===
+                    Note over PC,U8: 阶段1 创建登记单
                     PC->>MES: 新建登记单
-                    MES->>U8: POST GetPage (callU8Api)
-                    U8-->>MES: 发货单列表
-                    MES->>U8: POST GetDetail (callU8Api)
-                    U8-->>MES: 发货单详情(含明细行)
-                    MES->>MES: 生成登记单号+二维码+路线
-                    MES->>MES: INSERT dzwl_outbound_header + body
-                    MES->>MES: 状态: PENDING_TARE
-                    MES-->>PC: 返回登记单详情(含二维码)
-                    PC->>PC: 浏览器打印 window.print()
+                    MES->>U8: 调用 GetPage 接口
+                    U8-->>MES: 返回发货单列表
+                    MES->>U8: 调用 GetDetail 接口
+                    U8-->>MES: 返回发货单详情
+                    MES->>MES: 生成登记单号与二维码
+                    MES->>MES: 写入 dzwl_outbound 表
+                    MES->>MES: 状态置为 PENDING_TARE
+                    MES-->>PC: 返回登记单详情与二维码
+                    PC->>PC: 浏览器打印
 
-                    Note over Mini,Scale: === 阶段2: 称皮重 (小程序) ===
+                    Note over Mini,Scale: 阶段2 称皮重
                     Mini->>MES: 扫码获取登记单
-                    MES->>MES: 校验二维码+状态+角色
-                    MES-->>Mini: 登记单详情
-                    Mini->>MES: POST getWeight
-                    MES->>Scale: POST /process_number (IWeighService)
-                    Scale-->>MES: 重量结果
+                    MES->>MES: 校验二维码 状态 角色
+                    MES-->>Mini: 返回登记单详情
+                    Mini->>MES: 请求获取皮重
+                    MES->>Scale: 调用地磅接口
+                    Scale-->>MES: 返回重量
                     MES-->>Mini: 实时重量
-                    Mini->>MES: PUT bind-tare
-                    MES->>MES: 记录 tare_operator + tare_weight
-                    MES->>MES: 状态: TARE_DONE
+                    Mini->>MES: 绑定皮重
+                    MES->>MES: 记录操作人与皮重
+                    MES->>MES: 状态置为 TARE_DONE
 
-                    Note over Mini: === 阶段3: 装车扫码 (多人协作) ===
+                    Note over Mini: 阶段3 装车扫码
                     loop 逐件装车
-                    Mini->>MES: POST scan-certificate
-                    MES->>MES: 校验(有效性/已出库/合同号)
-                    MES->>MES: INSERT scan_record
-                    MES-->>Mini: 扫描记录ID
+                    Mini->>MES: 提交合格证扫描
+                    MES->>MES: 校验有效性 已出库 合同号
+                    MES->>MES: 写入扫描记录表
+                    MES-->>Mini: 返回扫描结果
                     end
 
-                    Note over Mini,Scale,U8: === 阶段4: 称毛重+确认出库 (小程序) ===
+                    Note over Mini,Scale: 阶段4 称毛重并确认出库
                     Mini->>MES: 获取实时数据
-                    MES->>Scale: POST /process_number (IWeighService)
-                    Scale-->>MES: 毛重数据
-                    MES->>MES: 计算净重+差值
-                    MES-->>Mini: 重量汇总信息
-                    Mini->>MES: POST confirm
-                    MES->>MES: 净重分配 + 标记is_delivered
-                    MES->>U8: POST Consignment save (回写重量)
+                    MES->>Scale: 调用地磅接口
+                    Scale-->>MES: 返回毛重
+                    MES->>MES: 计算净重与差值
+                    MES-->>Mini: 返回重量汇总
+                    Mini->>MES: 确认出库请求
+                    MES->>MES: 分配净重并标记已出库
+                    MES->>U8: 回写发货单重量
                     U8-->>MES: 保存成功
-                    MES->>MES: 记录confirm_operator
-                    MES->>MES: 状态: PENDING_REVIEW
+                    MES->>MES: 记录确认操作人
+                    MES->>MES: 状态置为 PENDING_REVIEW
                     MES-->>Mini: 确认成功
 
-                    Note over PC,U8: === 阶段5: 审核 (PC端) ===
-                    PC->>MES: POST review
+                    Note over PC,U8: 阶段5 审核
+                    PC->>MES: 提交审核
                     MES->>MES: 幂等检查
-                    MES->>U8: POST SaleOut save (callU8Api)
-                    U8-->>MES: u8SaleOutId
-                    MES->>U8: POST Verify (9004直接调用)
+                    MES->>U8: 保存销售出库单
+                    U8-->>MES: 返回出库单ID
+                    MES->>U8: 审核销售出库单
                     U8-->>MES: 审核成功
-                    MES->>MES: 状态: COMPLETED + 二维码失效
-                    MES-->>PC: 审核成功 + 出门证
+                    MES->>MES: 状态置为 COMPLETED
+                    MES-->>PC: 审核成功 并生成出门证
                 </div>
             </div>
         </div>
