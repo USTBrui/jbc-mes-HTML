@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大宗物料销售出库项目需求 v4.0</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text: #2c3e50;
+    --text-secondary: #6c757d;
+    --border: #e2e8f0;
+    --primary: #2563eb;
+    --primary-light: #dbeafe;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --purple: #8b5cf6;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 15px;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  /* 顶部标题卡片 */
+  .hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 48px 40px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow-lg);
+  }
+  .hero h1 { font-size: 30px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+  .hero .meta { display: flex; gap: 24px; font-size: 14px; opacity: 0.85; margin-top: 12px; flex-wrap: wrap; }
+  .hero .meta span { display: flex; align-items: center; gap: 4px; }
+  .hero .quote { background: rgba(255,255,255,0.12); border-radius: 6px; padding: 14px 18px; margin-top: 20px; font-size: 13.5px; line-height: 1.7; }
+  /* 目录 */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 40px;
+    box-shadow: var(--shadow);
+  }
+  .toc h2 { font-size: 18px; margin-bottom: 16px; color: var(--primary); }
+  .toc ol { columns: 2; column-gap: 32px; padding-left: 20px; }
+  .toc li { margin-bottom: 6px; font-size: 14px; break-inside: avoid; }
+  .toc a { color: var(--text); text-decoration: none; }
+  .toc a:hover { color: var(--primary); text-decoration: underline; }
+  /* 章节卡片 */
+  .section {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+  }
+  .section h2 {
+    font-size: 22px;
+    color: var(--primary);
+    border-left: 4px solid var(--primary);
+    padding-left: 14px;
+    margin-bottom: 24px;
+    line-height: 1.4;
+  }
+  .section h3 { font-size: 17px; color: #34495e; margin: 28px 0 12px; }
+  .section h4 { font-size: 15px; color: #475569; margin: 20px 0 10px; }
+  .section p { margin-bottom: 14px; }
+  .section strong { color: #1e293b; }
+  .section code {
+    background: #f1f5f9;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #e11d48;
+  }
+  .section pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 16px 0;
+  }
+  /* 表格 */
+  .table-wrap { overflow-x: auto; margin: 18px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 600px;
+  }
+  thead { background: #f1f5f9; }
+  thead th {
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:hover { background: #f8fafc; }
+  th:first-child, td:first-child { border-radius: 0; }
+  /* 版本演进表 */
+  .version-table td:first-child { font-weight: 700; white-space: nowrap; }
+  .version-table td:nth-child(2) { white-space: nowrap; }
+  /* 决策录表 */
+  .decision-table td:first-child { font-weight: 700; text-align: center; white-space: nowrap; }
+  /* 状态机 ASCII */
+  pre.ascii-art {
+    background: #0f172a;
+    color: #10b981;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 20px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+  }
+  /* 系统架构ASCII */
+  pre.arch-diagram {
+    background: #0f172a;
+    color: #93c5fd;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    padding: 20px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+  }
+  /* 纸质单ASCII */
+  pre.receipt-ascii {
+    background: #fffbeb;
+    color: #78350f;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid #fcd34d;
+    overflow-x: auto;
+  }
+  /* 引导牌ASCII */
+  pre.guide-ascii {
+    background: #eff6ff;
+    color: #1e40af;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid #93c5fd;
+    overflow-x: auto;
+  }
+  /* 引文块 */
+  blockquote {
+    background: #f0fdf4;
+    border-left: 4px solid var(--success);
+    margin: 16px 0;
+    padding: 14px 18px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: #166534;
+    font-size: 14px;
+  }
+  /* 流程图容器 */
+  .mermaid-wrap {
+    background: #fafafa;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+    overflow-x: auto;
+  }
+  .mermaid-wrap .mermaid { display: flex; justify-content: center; }
+  /* 徽章 */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  /* 规则卡片 */
+  .rule-card {
+    background: #fefce8;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 14px 0;
+  }
+  .rule-card strong { color: #854d0e; }
+  /* JSON */
+  pre.json-block {
+    background: #1e293b;
+    color: #fbbf24;
+  }
+  /* 响应式 */
+  @media (max-width: 768px) {
+    .container { padding: 16px 12px 40px; }
+    .hero { padding: 28px 20px; }
+    .hero h1 { font-size: 22px; }
+    .section { padding: 24px 20px; }
+    .toc ol { columns: 1; }
+    .hero .meta { flex-direction: column; gap: 4px; }
+  }
+  /* 打印样式 */
+  @media print {
+    body { background: #fff; color: #000; }
+    .container { max-width: 100%; padding: 0; }
+    .section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+    .hero { background: #1e3a5f !important; -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="hero">
+  <h1>大宗物料销售出库项目需求 v4.0</h1>
+  <div class="meta">
+    <span>📅 更新日期：2026-05-13</span>
+    <span>✍️ 作者：wr</span>
+    <span>📋 版本：4.0（终版）</span>
+  </div>
+  <div class="quote">
+    整合 v3.0（基础架构）+ v3.1（扫码认领制）+ v3.2（多人员协作/纸质登记单重设计/厂区引导方案/逐件计工）+ U8接口集成方案，形成终版
+  </div>
+</div>
+
+<nav class="toc">
+  <h2>📑 目录</h2>
+  <ol>
+    <li><a href="#s1">项目背景与目标</a></li>
+    <li><a href="#s2">系统定位与设计原则</a></li>
+    <li><a href="#s3">角色与权限模型</a></li>
+    <li><a href="#s4">核心设计理念</a></li>
+    <li><a href="#s5">核心业务流程</a></li>
+    <li><a href="#s6">厂区引导方案</a></li>
+    <li><a href="#s7">纸质登记单设计</a></li>
+    <li><a href="#s8">装车路线规划</a></li>
+    <li><a href="#s9">状态机设计</a></li>
+    <li><a href="#s10">异常处理机制</a></li>
+    <li><a href="#s11">功能模块清单</a></li>
+    <li><a href="#s12">模块A：销售出库主流程</a></li>
+    <li><a href="#s13">模块B：库提拆件子系统</a></li>
+    <li><a href="#s14">模块C：订单管理完善</a></li>
+    <li><a href="#s15">模块D：出库工作量统计</a></li>
+    <li><a href="#s16">模块E：库位管理</a></li>
+    <li><a href="#s17">数据模型设计</a></li>
+    <li><a href="#s18">API接口设计</a></li>
+    <li><a href="#s19">U8接口集成方案</a></li>
+    <li><a href="#s20">与现有系统的衔接</a></li>
+    <li><a href="#s21">远期规划与扩展点</a></li>
+    <li><a href="#s22">专业建议与风险提示</a></li>
+    <li><a href="#s23">附录</a></li>
+  </ol>
+</nav>
+
+<!-- 版本演进 -->
+<div class="section">
+  <h2>版本演进</h2>
+  <div class="table-wrap">
+    <table class="version-table">
+      <thead><tr><th>版本</th><th>日期</th><th>核心变化</th></tr></thead>
+      <tbody>
+        <tr><td>v1.0</td><td>2026-04</td><td>结算中心初稿</td></tr>
+        <tr><td>v2.0</td><td>2026-05-01</td><td>状态机、角色、数据模型、API</td></tr>
+        <tr><td>v2.1</td><td>2026-05-01</td><td>装卸工小程序、无人值守调研</td></tr>
+        <tr><td>v3.0</td><td>2026-05-10</td><td>扫码前置装车、纸质登记单、成品库人员角色，含完整数据模型和API</td></tr>
+        <tr><td>v3.1</td><td>2026-05-09</td><td>从「分配制」改为「扫码认领制」；新增工作量统计模块D</td></tr>
+        <tr><td>v3.2</td><td>2026-05-10</td><td>多人员协作装车（逐件计工）；纸质登记单格式重设计；司机自助流转+厂区引导方案</td></tr>
+        <tr><td><strong>v4.0</strong></td><td>2026-05-13</td><td><strong>整合所有前序版本 + U8接口集成方案 + 代码审查结论 + 技术决策录</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 技术决策录 -->
+<div class="section">
+  <h2>技术决策录（v4.0 代码审查后确认）</h2>
+  <p>以下决策基于对现有 <code>mes-warehouse</code> 模块、数据库、小程序前端的全面审查后确认：</p>
+  <div class="table-wrap">
+    <table class="decision-table">
+      <thead><tr><th>编号</th><th>决策项</th><th>结论</th><th>依据</th></tr></thead>
+      <tbody>
+        <tr><td>D1</td><td>旧 OutboundHeader/OutboundBody 表处理</td><td>删除旧表，建新表</td><td>旧表字段与v4.0设计完全不同；数据库实际不存在 <code>dzwl_outbound_header</code>/<code>dzwl_outbound_body</code> 表</td></tr>
+        <tr><td>D2</td><td>表名前缀</td><td>全部带 <code>dzwl_</code> 前缀</td><td>MCP查数据库确认：<code>dzwl_inbound_header</code>、<code>dzwl_inbound_body</code> 等6表均带前缀</td></tr>
+        <tr><td>D3</td><td>前端项目</td><td>仅开发 wxma-v3（新版）</td><td>jbc-wxma（旧版）不动</td></tr>
+        <tr><td>D4</td><td>称重方式</td><td>直接调用 <code>IWeighService</code>（地磅直连）</td><td>已是生产环境入库称重的实际方案</td></tr>
+        <tr><td>D5</td><td>库位字段</td><td>在 <code>dzwl_inbound_body</code> 新增 <code>warehouse_code</code></td><td>现有 <code>cargoLocation</code> 是货位级别，需新增独立的仓库级别字段</td></tr>
+        <tr><td>D6</td><td>审核接口</td><td>出库+入库审核统一改为 <code>http://www.kingpipe.com:9004</code></td><td>出库审核：<code>/api/saleout/Verify</code>；入库审核：<code>/api/ProductIn/Verify</code>。放弃17601中间层</td></tr>
+        <tr><td>D7</td><td>U8账套号获取</td><td>从 <code>u8_integration</code> 表 <code>default_or_not='Y'</code> 记录获取</td><td>和入库 DiskSaveServiceImpl 一致</td></tr>
+        <tr><td>D8</td><td>纸质登记单打印</td><td>后端 <code>QRCodeUtils</code> 生成二维码图片，前端用浏览器打印</td><td>不走 PrintServiceImpl 中间服务</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第一章 -->
+<div class="section" id="s1">
+  <h2>一、项目背景与目标</h2>
+  <h3>1.1 背景</h3>
+  <p>当前 MES 大宗物料系统已完成入库功能（扫码→称重→临时表→存盘→同步U8），但出库环节空白。结算中心仍在使用老旧的销售出库流程，效率低下且数据追溯困难。</p>
+  <h3>1.2 目标</h3>
+  <p>开发大宗物料销售出库功能，使结算中心、装卸工、成品库人员、地磅室能在 MES 中完成从创建登记单到最终生成 U8 销售出库单的完整出库流程。同时支持工作量统计，为工资核算提供数据支持。</p>
+
+  <h3>1.3 核心设计原则</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>原则</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>U8为唯一主数据源</strong></td><td>库存数据、财务核算以U8为准，MES是U8的现场操作终端</td></tr>
+        <tr><td><strong>MES不做进销存</strong></td><td>MES不构建独立的库存管理系统，只记录操作过程数据用于追溯</td></tr>
+        <tr><td><strong>U8不可用时降级运行</strong></td><td>U8接口异常时，MES本地操作不中断，待U8恢复后补同步</td></tr>
+        <tr><td><strong>扫码认领制</strong></td><td>纸质登记单二维码 = 通行证，扫码即获操作权限</td></tr>
+        <tr><td><strong>权限一致</strong></td><td>装卸工/成品库人员/地磅室对登记单操作权限完全相同</td></tr>
+        <tr><td><strong>一票到底</strong></td><td>同一张纸质登记单贯穿全流程，司机/装卸工均可持有流转</td></tr>
+        <tr><td><strong>逐件计工</strong></td><td>每扫一个合格证独立记录操作人，多人装同一车各自计工作量</td></tr>
+        <tr><td><strong>重量校验 ≤ 0.2吨</strong></td><td>过磅净重与入库重量合计误差校验</td></tr>
+        <tr><td><strong>安全第一</strong></td><td>行车吊装钢管有严格安全规范，装卸工不可替代；MES辅助提效</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第二章 -->
+<div class="section" id="s2">
+  <h2>二、系统定位与设计原则</h2>
+  <h3>2.1 系统定位</h3>
+<pre class="arch-diagram">
+┌──────────────────────────────────────────────────────┐
+│              用友U8 ERP（主数据源 / 财务核算系统）     │
+│                                                      │
+│  库存管理 ←→ 销售发货单 ←→ 销售出库单 ←→ 财务核算    │
+│                      ▲               ▲               │
+│                      │ 读取          │ 写入           │
+│                      │               │               │
+│  ┌───────────────────┴───────────────┴─────────────┐ │
+│  │          MES大宗物料系统（现场操作终端）         │ │
+│  │                                                  │ │
+│  │  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────┐ │ │
+│  │  │ 销售出库 │ │ 库提拆件 │ │ 订单   │ │工作量│ │ │
+│  │  │ 主流程   │ │ 子系统   │ │ 完善   │ │统计  │ │ │
+│  │  └──────────┘ └──────────┘ └────────┘ └──────┘ │ │
+│  │  ┌──────────┐                                   │ │
+│  │  │ 库位管理 │                                   │ │
+│  │  └──────────┘                                   │ │
+│  └─────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┘</pre>
+
+  <p><strong>MES的职责</strong>：从U8读取库存、发货单、客户、产品等参考数据；连接地磅获取实时重量；扫合格证实现单品级出库追溯；业务完成后将结果写回U8。</p>
+  <p><strong>MES不做的事</strong>：不维护独立的库存主数据；不做财务核算；不做采购管理。</p>
+</div>
+
+<!-- 第三章 -->
+<div class="section" id="s3">
+  <h2>三、角色与权限模型</h2>
+  <h3>3.1 角色总览</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>角色</th><th>终端</th><th>登记单操作权限</th><th>职责</th></tr></thead>
+      <tbody>
+        <tr><td><strong>结算中心</strong></td><td>PC端</td><td>创建、打印、审核（终审权）</td><td>创建登记单→打印纸质单→审核出库→U8同步→出门证</td></tr>
+        <tr><td><strong>装卸工</strong></td><td>小程序</td><td>扫码认领→称皮重→装车扫码→称毛重→确认出库</td><td>实物装车 + 系统操作</td></tr>
+        <tr><td><strong>成品库人员</strong></td><td>小程序</td><td>与装卸工完全一致 + 库提拆件</td><td>库内产品管理 + 拆件</td></tr>
+        <tr><td><strong>地磅室</strong></td><td>小程序</td><td>与装卸工完全一致</td><td>称重 + 应急支持</td></tr>
+        <tr><td><strong>司机</strong></td><td>无系统</td><td>纸质登记单的物理传递者</td><td>开车 + 传递单据</td></tr>
+        <tr><td><strong>管理员</strong></td><td>PC端</td><td>配置管理</td><td>称重地点、参数、权限</td></tr>
+        <tr><td><strong>领导</strong></td><td>U8</td><td>-</td><td>第二天检查U8单据</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 权限矩阵</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>角色</th><th>待称皮重</th><th>待装车</th><th>待审核</th><th>已完成</th></tr></thead>
+      <tbody>
+        <tr><td>装卸工</td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-red">❌ 无权</span></td><td><span class="badge badge-blue">👁 查看</span></td></tr>
+        <tr><td>成品库人员</td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-red">❌ 无权</span></td><td><span class="badge badge-blue">👁 查看</span></td></tr>
+        <tr><td>地磅室</td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-red">❌ 无权</span></td><td><span class="badge badge-blue">👁 查看</span></td></tr>
+        <tr><td>结算中心</td><td><span class="badge badge-blue">👁 查看</span></td><td><span class="badge badge-blue">👁 查看</span></td><td><span class="badge badge-green">✅ 可操作</span></td><td><span class="badge badge-blue">👁 查看</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.3 核心规则</h3>
+  <div class="rule-card">
+    <strong>扫码即认领</strong>：扫纸质登记单二维码 → 系统校验角色 → 打开操作界面<br>
+    <strong>不扫不能操作</strong>：登记单不出现在任何人的任务列表里，只有扫码才能获取<br>
+    <strong>状态决定权限</strong>：见权限矩阵<br>
+    <strong>操作即记录</strong>：每次关键操作自动记录操作人ID、姓名、时间
+  </div>
+
+  <h3>3.4 角色说明</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>角色</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>装卸工为何不可替代</strong></td><td>行车吊装钢管有严格的安全生产规范，必须持证上岗。任何阶段都不交由司机或外部人员操作。</td></tr>
+        <tr><td><strong>成品库人员与装卸工的区别</strong></td><td>装卸工负责出库装车+扫码+称重；成品库人员负责库内产品管理（入库、存盘、拆件等）。</td></tr>
+        <tr><td><strong>地磅室的转变</strong></td><td>从「现场操作者」转为「远程监督+应急支持」。装卸工出示纸质登记单二维码时可快速扫码定位。</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第四章 -->
+<div class="section" id="s4">
+  <h2>四、核心设计理念</h2>
+  <h3>4.1 「扫码认领制」</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>维度</th><th>旧方案（v3.0 分配制）</th><th>新方案（扫码认领制）</th></tr></thead>
+      <tbody>
+        <tr><td>灵活度</td><td>结算中心必须预先指定谁操作</td><td>现场谁有空谁扫码操作</td></tr>
+        <tr><td>跟车模式</td><td>必须有装卸工跟车</td><td>可以装卸工跟车，也可以司机自主</td></tr>
+        <tr><td>工作量统计</td><td>无法精确到实际操作人</td><td>精确到每次操作的实际执行人</td></tr>
+        <tr><td>工资核算</td><td>无法基于实际工作量</td><td>可直接导出工作量报表，对接工资</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>4.2 「一票到底」模式</h3>
+  <blockquote>一张纸质登记单 = 一个二维码 = 全流程通行证</blockquote>
+  <p>同一张纸质登记单在司机/装卸工手中物理流转，各站点人员扫码即操作。系统完全不感知「谁拿着纸质单」，只感知「谁扫了二维码在操作」。</p>
+
+  <h3>4.3 「逐件计工」模式</h3>
+  <p><strong>v3.1 的问题</strong>：<code>certificate_operator</code> 在表头上，只能记录一个人，无法处理多人协作装同一车。</p>
+  <p><strong>解决方案</strong>：建立独立的扫码记录表，每扫一个合格证 = 一条记录。</p>
+  <pre>
+登记单 20260501-A3F7K2
+
+扫描记录表 dzwl_outbound_scan_record：
+┌────┬──────┬──────────┬──────────────┬──────┐
+│ 序号│ 人员 │ 合格证码  │ 入库重量(t)   │ 时间 │
+├────┼──────┼──────────┼──────────────┼──────┤
+│  1 │ 张三 │ ZS001    │    2.500     │ 09:15│ ← 张三工作量
+│  2 │ 张三 │ ZS002    │    3.200     │ 09:17│ ← 张三工作量
+│  3 │ 李四 │ ZS003    │    2.800     │ 09:22│ ← 李四工作量
+│  4 │ 李四 │ ZS004    │    3.100     │ 09:25│ ← 李四工作量
+│  5 │ 王五 │ ZS005    │    2.200     │ 09:30│ ← 王五工作量
+└────┴──────┴──────────┴──────────────┴──────┘</pre>
+</div>
+
+<!-- 第五章 -->
+<div class="section" id="s5">
+  <h2>五、核心业务流程</h2>
+  <h3>5.1 兼容三种流转模式</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>模式</th><th>纸质单持卡人</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>模式A：装卸工全程跟车</strong></td><td>装卸工</td><td>纸质单全程在装卸工手中，装卸工自己扫码操作</td></tr>
+        <tr><td><strong>模式B：司机全程自助</strong></td><td>司机（仅传递单据）</td><td>司机不操作系统，到达各站点时将纸质单交给站点人员扫码操作</td></tr>
+        <tr><td><strong>模式C：混合模式</strong></td><td>司机传递</td><td>各步骤操作者不同</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>5.2 模式B流程详解（司机全程自助）</h3>
+  <p>
+    步骤① 结算中心(PC)：创建登记单→打印纸质单→交给司机<br>
+    步骤② 司机开车到地磅 → 将纸质单交给地磅室人员 → 地磅室人员扫二维码 → 称皮重 → 绑定 → 纸质单还给司机<br>
+    步骤③ 司机开车到成品库 → 将纸质单交给成品库人员 → 逐件装车+扫合格证 → 多人协作各自计工 → 纸质单还给司机<br>
+    步骤④ 司机开车回地磅 → 将纸质单交给地磅室人员 → 称毛重 → 确认出库 → 纸质单还给司机<br>
+    步骤⑤ 司机到结算中心 → 交纸质单 → 结算中心审核 → 生成U8销售出库单 → 开出门证 → 完成
+  </p>
+
+  <h3>5.3 步骤详解</h3>
+  <h4>步骤①：结算中心创建登记单 + 打印纸质单</h4>
+  <p>结算中心在MES PC端，进入「大宗物料→销售出库→登记单管理」，点击「新建登记单」。系统调用U8 API获取「已保存未出库」的U8发货单列表供筛选。选择发货单后系统自动拉取数据预填。不指定操作人。保存后系统自动：生成登记单号（格式：yyyyMMdd-6位随机码）、生成登记单二维码、计算装车路线、状态→待称皮重。</p>
+
+  <h4>步骤②：称皮重</h4>
+  <p>操作者打开小程序，扫码获取登记单。系统校验：二维码有效 + 状态=待称皮重 + 有操作角色。核对车牌号，引导车辆上磅，点击获取皮重（轮询磅秤API），稳定后点击绑定为皮重。自动记录操作人信息，状态→待装车。</p>
+
+  <h4>步骤③：装车扫码</h4>
+  <p>操作者引导车辆到成品库。扫纸质登记单二维码进入界面。逐件装车+立即扫合格证码，校验有效性/是否已出库/合同号。每扫一件插入一条扫描记录。支持多人协作，各自记录名下。</p>
+
+  <h4>步骤④：称毛重 + 确认出库</h4>
+  <p>装车完毕，车辆驶回地磅。核对已绑定列表，实时显示毛重并自动计算净重和差值。差值≤0.2吨时可确认出库：分配净重到每件产品、标记is_delivered、回写U8发货单、记录确认操作人、状态→待审核。</p>
+
+  <h4>步骤⑤：审核</h4>
+  <p>结算中心筛选「待审核」登记单，点击审核。系统执行：保存U8销售出库单→获取u8SaleOutId→审核U8销售出库单→状态→已完成→二维码失效→开具出门证。</p>
+
+  <h3>5.4 称重技术方案</h3>
+  <p>统一使用 <code>IWeighService</code> 直连地磅硬件（与入库称重完全一致）。</p>
+  <p><strong>调用链路</strong>：小程序前端 → ExternalServiceController → WeighServiceImpl → 地磅硬件 (<code>POST https://www.kingpipe.com:17601/process_number</code>)</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>场景</th><th>对应步骤</th><th>称重类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>称皮重</td><td>步骤②</td><td>获取当前重量 → 绑定为皮重</td><td>空车过磅</td></tr>
+        <tr><td>称毛重</td><td>步骤④</td><td>实时显示当前重量 → 自动计算净重和差值</td><td>装车后过磅</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第六章 - 厂区引导 -->
+<div class="section" id="s6">
+  <h2>六、厂区引导方案</h2>
+  <h3>6.2 三级引导牌体系</h3>
+  <h4>第一级：厂区入口总导览</h4>
+<pre class="guide-ascii">
+┌──────────────────────────────────────────────┐
+│              XX钢管厂 物流路线导览             │
+│                                              │
+│   ┌──────┐     ┌────────┐     ┌──────┐      │
+│   │ 地磅 │ →→→ │ 成品库 │ →→→ │ 地磅 │       │
+│   │ ①号 │     │        │     │ ①号 │       │
+│   └──────┘     └────────┘     └──────┘      │
+│                                              │
+│   成品库编号：A库=冷拔无缝管  B库=热轧无缝管   │
+│              C库=毛管        D库=其他产品     │
+└──────────────────────────────────────────────┘</pre>
+
+  <h3>6.3 引导牌编号体系</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>编号</th><th>含义</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>地磅①号</td><td>大宗物料专用地磅</td><td><code>dzwl_inbound_set</code> 中配置的称重地点</td></tr>
+        <tr><td>成品库A</td><td>冷拔无缝管仓库</td><td>库位编码 A</td></tr>
+        <tr><td>成品库B</td><td>热轧无缝管仓库</td><td>库位编码 B</td></tr>
+        <tr><td>成品库C</td><td>毛管仓库</td><td>库位编码 C</td></tr>
+        <tr><td>成品库D</td><td>其他产品仓库</td><td>库位编码 D</td></tr>
+        <tr><td>结算中心</td><td>审核/出门证</td><td>结算中心办公室</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第七章 - 纸质登记单 -->
+<div class="section" id="s7">
+  <h2>七、纸质登记单设计</h2>
+  <h3>7.1 打印规格</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>参数</th><th>规格</th></tr></thead>
+      <tbody>
+        <tr><td>打印机类型</td><td>针式票据打印机（如 Epson TM-U220 / LQ-590K）</td></tr>
+        <tr><td>纸张</td><td>横向，宽度 240mm × 高度 140mm（约 A4 横向一半）</td></tr>
+        <tr><td>打印方式</td><td>一式两联（白联归档，粉联司机留存）</td></tr>
+        <tr><td>二维码</td><td>左侧 1/5 区域（约 48mm 宽），大尺寸便于扫码</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>7.2 版式设计（横向布局）</h3>
+<pre class="receipt-ascii">
+┌──────┬──────────────────────────────────────────────────────────────────┐
+│      │                      大宗物料出库登记单                          │
+│      │                 No: 20260501-A3F7K2                           │
+│      │                                                                  │
+│ 二   │  车牌：鲁Q-XXXXX                          日期：2026-05-01       │
+│ 维   │                                                                  │
+│ 码   │  装车路线：                                                       │
+│ 区   │  地磅①号 ─→ 成品库A(冷拔) ─→ 成品库B(热轧) ─→ 地磅①号 ─→ 结算中心│
+│ 域   │                                                                  │
+│ 48mm │  ───────────────────────────────────────────────────────────     │
+│  ×   │  装车明细：                                                       │
+│ 48mm │  ┌────┬──────┬──────────┬──────┬──────┬────────┬──────────────┐ │
+│      │  │序号│品名  │ 规格型号  │ 钢号 │ 标准 │数量(吨)│库位(第X站)   │ │
+│      │  ├────┼──────┼──────────┼──────┼──────┼────────┼──────────────┤ │
+│      │  │ 1  │ 冷管 │ 60×5     │ 20#  │ 8163 │ 10.000 │A库 ← 第1站  │ │
+│      │  │ 2  │ 热管 │ 89×6     │ 45#  │ 3087 │ 15.000 │B库 ← 第2站  │ │
+│      │  │ 3  │ 冷管 │ 76×4.5   │ 20#  │ 8163 │  8.000 │A库 ← 第1站  │ │
+│      │  └────┴──────┴──────────┴──────┴──────┴────────┴──────────────┘ │
+│      │                                                                  │
+│      │  装车顺序：先到A库装1、3号(共18.000吨) → 再到B库装2号           │
+│      │                                                                  │
+│      │  ───────────────────────────────────────────────────────────     │
+│      │  JBC-MES大宗物料系统                          打印：2026-05-01   │
+└──────┴──────────────────────────────────────────────────────────────────┘</pre>
+</div>
+
+<!-- 第八章 -->
+<div class="section" id="s8">
+  <h2>八、装车路线规划</h2>
+  <h3>8.1 路线规划逻辑</h3>
+  <p>系统处理流程：从登记单表体获取所有待出库产品 → 查询各产品对应的库存位置（库位编码）→ 按库位分组 → 按库位与地磅的距离排序确定访问顺序 → 生成路线并打印在纸质登记单上。</p>
+
+  <h3>8.2 库位数据来源</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>方案</th><th>实现方式</th><th>优先级</th></tr></thead>
+      <tbody>
+        <tr><td>方案1</td><td>在 <code>dzwl_inbound_body</code> 增加 <code>warehouse_code</code> 字段。入库时由成品库人员选择</td><td>⭐ 推荐</td></tr>
+        <tr><td>方案2</td><td>在 <code>dzwl_inbound_set</code> 中为每个称重地点关联默认仓库</td><td>简单但不精确</td></tr>
+        <tr><td>方案3</td><td>建立独立的库位管理表，入库时指定</td><td>功能最完善，周期长</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第九章 - 状态机 -->
+<div class="section" id="s9">
+  <h2>九、状态机设计</h2>
+<pre class="ascii-art">
+                   ┌─────────┐
+                   │  草稿   │  (PC端新建未保存)
+                   │  DRAFT  │
+                   └────┬────┘
+                        │ 保存 + 计算装车路线
+                        ▼
+                   ┌─────────┐
+                   │ 待称皮重│  扫码认领→称皮重→记录tare_operator
+                   │ PENDING │
+                   │ _TARE   │
+                   └────┬────┘
+                        │
+                        ▼
+                   ┌─────────┐
+                   │ 待装车  │  扫码认领→逐件装车扫码
+                   │ TARE    │  每件→插入scan_record(含操作人)
+                   │ _DONE   │  多人可协作，各自记录
+                   └────┬────┘
+                        │ 装车完毕→回车称毛重→校验差值→确认出库
+                        │ 记录confirm_operator + 回写U8发货单
+                        ▼
+                   ┌─────────┐
+                   │ 待审核  │  仅结算中心可审核
+                   │ PENDING │
+                   │ _REVIEW │
+                   └────┬────┘
+                        │ 审核 → 生成+审核U8销售出库单
+                        ▼
+                   ┌─────────┐
+                   │ 已完成  │  二维码失效，纸质单归档
+                   │ COMPLETE│
+                   │ D       │
+                   └─────────┘
+
+
+   ┌─────────┐  任一环节结算中心可手动   ┌─────────┐
+   │ 已作废  │ ◀────────────────────── │任意状态 │
+   │ CANCELLE│                         │(除已完成)│
+   │ D       │                         └─────────┘
+   └─────────┘</pre>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>状态</th><th>操作者</th><th>可执行操作</th></tr></thead>
+      <tbody>
+        <tr><td><code>DRAFT</code></td><td>结算中心</td><td>编辑、删除</td></tr>
+        <tr><td><code>PENDING_TARE</code></td><td>装卸工/成品库/地磅室（任一人）</td><td>扫二维码→绑定皮重</td></tr>
+        <tr><td><code>TARE_DONE</code></td><td>装卸工/成品库/地磅室（任一人）</td><td>扫二维码→装车扫码→称毛重→确认出库</td></tr>
+        <tr><td><code>PENDING_REVIEW</code></td><td>仅结算中心</td><td>审核</td></tr>
+        <tr><td><code>COMPLETED</code></td><td>所有人</td><td>仅查看</td></tr>
+        <tr><td><code>CANCELLED</code></td><td>所有人</td><td>仅查看</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十章 -->
+<div class="section" id="s10">
+  <h2>十、异常处理机制</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>异常</th><th>处理方式</th></tr></thead>
+      <tbody>
+        <tr><td>磅差 &gt; 0.2t</td><td>「重量差异过大（X.XX吨），请检查装车产品或合格证」→ 返回成品库核对</td></tr>
+        <tr><td>合格证已出库</td><td>「该产品已出库（时间XXX）」→ 换未出库产品</td></tr>
+        <tr><td>合同号不匹配</td><td>「合同号XXX与登记单YYY不一致」→ 换正确合同号产品</td></tr>
+        <tr><td>磅秤失败</td><td>「地磅连接失败」+ 手动入口 + 求助 → 地磅室诊断/授权</td></tr>
+        <tr><td>U8超时</td><td>「U8暂不可用，本地已保存」→ 继续操作，U8恢复后补同步</td></tr>
+        <tr><td>二维码被多人同时扫</td><td>后扫的人提示：「该登记单正在被 XXX 操作中」（Redis 锁，30s 过期）</td></tr>
+        <tr><td>司机找不到成品库</td><td>纸质单上有库位编号和路线引导；现场引导牌指引</td></tr>
+        <tr><td>纸质单在途中丢失</td><td>结算中心可重新打印，原二维码自动失效，新二维码生效</td></tr>
+        <tr><td>部分产品未指定库位</td><td>登记单创建时 <code>warehouse_code</code> 为空 → 提示「部分产品未指定库位，无法计算装车路线」</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十一章 -->
+<div class="section" id="s11">
+  <h2>十一、功能模块清单</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>模块</th><th>说明</th><th>新增/变更</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A. 销售出库主流程</strong></td><td>登记单管理(PC) + 登记单操作(小程序)</td><td>含路线图、多人协作</td></tr>
+        <tr><td><strong>B. 库提拆件子系统</strong></td><td>库提出库/存盘/入库/存盘 4个页面</td><td>成品库人员操作</td></tr>
+        <tr><td><strong>C. 订单管理完善</strong></td><td>入库明细 + 发货进度 + 出库记录</td><td>订单维度可视化</td></tr>
+        <tr><td><strong>D. 出库工作量统计</strong></td><td>逐件统计装车、称重、确认工作量</td><td>基于 scan_record 表</td></tr>
+        <tr><td><strong>E. 库位管理</strong></td><td>产品入库时指定库位，支撑路线规划</td><td>新增</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十二章 -->
+<div class="section" id="s12">
+  <h2>十二、模块A：销售出库主流程</h2>
+  <h3>12.1 PC端：登记单管理</h3>
+  <p><strong>路径</strong>：大宗物料 → 销售出库 → 登记单管理</p>
+  <h4>12.1.1 登记单列表</h4>
+  <p>筛选条件：登记单号、U8发货单号、客户、车牌号、状态、日期范围。列表字段：登记单号、发货单号、客户、车牌号、皮重、毛重、净重、称皮人、状态、创建时间。操作按钮：查看详情、打印纸质登记单、作废（非终态）、审核（待审核态）。</p>
+
+  <h4>12.1.2 新建登记单</h4>
+  <ol>
+    <li>「新建登记单」</li>
+    <li>系统调用U8 API获取发货单列表（仅「已保存未完成出库」的U8发货单）</li>
+    <li>选择发货单后，自动拉取预填表头（客户名称、销售部门、U8发货单号、发货日期、车牌号）和表体（存货编码、存货名称、规格型号、钢号、标准、发货数量）</li>
+    <li>点击「保存」→ 生成登记单号 + 二维码 + 计算装车路线 → 状态：待称皮重</li>
+    <li>可选择立即打印纸质登记单</li>
+  </ol>
+
+  <h4>12.1.3 审核登记单</h4>
+  <ol>
+    <li>筛选「待审核」→ 查看详情，确认数据完整</li>
+    <li>点击「审核」</li>
+    <li>系统执行：调用U8 API <code>/api/SaleOut/save</code> 保存销售出库单 → 调用U8 API <code>/api/saleout/Verify</code> 审核出库单 → 状态→已完成 → 开具出门证</li>
+  </ol>
+
+  <h3>12.2 小程序端：登记单操作</h3>
+  <p><strong>路径</strong>：大宗物料 → 出库操作</p>
+  <p><strong>入口：扫码认领</strong> — 操作者打开小程序，扫描纸质登记单二维码，系统校验二维码有效性+登记单状态+操作者角色，通过后打开对应状态的操作界面。</p>
+</div>
+
+<!-- 第十三章 -->
+<div class="section" id="s13">
+  <h2>十三、模块B：库提拆件子系统</h2>
+  <h3>13.1 业务场景</h3>
+  <p>客户购买一件产品（多根钢管打包成一件）中的<strong>部分</strong>钢管。由<strong>成品库人员</strong>操作拆件。</p>
+
+  <h3>13.2 拆件流程</h3>
+<pre class="ascii-art">
+原有入库件 (TrackNumber: 合格证1, is_split = 0)
+  │
+  │ 成品库人员拆为 2 件
+  │
+  ├──▶ 出库件 (给客户) → 库提出库(临时出库单) → 库提出库存盘 → U8产成品出库单
+  │    新合格证: TrackNumber-S1
+  │    重量: 原入库重的一部分
+  │
+  └──▶ 剩件 (回库) → 库提入库(临时入库单) → 库提入库存盘 → U8产成品入库单
+       新合格证: TrackNumber-S2
+       重量: 原入库重的一部分
+
+原有入库件 → is_split = 1（标记已拆件）</pre>
+
+  <h3>13.3 四个子页面</h3>
+  <p><strong>库提出库</strong>：扫原有合格证码→填写拆出数量→生成新合格证码→生成临时出库单→打印新合格证。</p>
+  <p><strong>库提出库存盘</strong>：筛选待存盘的临时出库记录→批量选择→存盘→调用U8 API生成产成品出库单。</p>
+  <p><strong>库提入库</strong>：自动获取拆件后剩余信息→生成新合格证码→入库重量=原入库重-拆出重量→生成临时入库单→打印新合格证。</p>
+  <p><strong>库提入库存盘</strong>：筛选待存盘→批量存盘→调用U8 API生成产成品入库单。</p>
+</div>
+
+<!-- 第十四章 -->
+<div class="section" id="s14">
+  <h2>十四、模块C：订单管理完善</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>视图</th><th>关键字段/指标</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>入库明细</td><td>合格证码、品名/规格/钢号、入库重量(t)、支数、状态（未出库/已出库/已拆件）</td><td><code>dzwl_inbound_body</code></td></tr>
+        <tr><td>发货进度汇总</td><td>订单总量、已入库数量、已发货数量、未发货数量</td><td>SUM聚合计算</td></tr>
+        <tr><td>出库记录</td><td>登记单号、U8发货单号、客户、出库日期、重量、状态</td><td><code>dzwl_outbound_header</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十五章 -->
+<div class="section" id="s15">
+  <h2>十五、模块D：出库工作量统计</h2>
+  <h3>15.1 数据来源</h3>
+  <p>基于新表 <code>dzwl_outbound_scan_record</code>。称皮重和确认出库的操作人仍在表头，单独查询。</p>
+
+  <h3>15.2 统计维度</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>视图</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>人员日明细</strong></td><td>某人员某天扫了哪些合格证、各多少吨/支</td></tr>
+        <tr><td><strong>人员日汇总</strong></td><td>某人员某天总计装车吨数、支数、件数</td></tr>
+        <tr><td><strong>人员月汇总</strong></td><td>按月汇总，用于工资核算</td></tr>
+        <tr><td><strong>登记单维度</strong></td><td>每个登记单由哪些人协作完成</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>15.4 工作量统计接口</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>GET /warehouse/workload/scan-list</code></td><td>扫码工作量明细（基于 scan_record）</td></tr>
+        <tr><td><code>GET /warehouse/workload/scan-summary</code></td><td>按人员+日期汇总吨/支/件</td></tr>
+        <tr><td><code>GET /warehouse/workload/tare-summary</code></td><td>称皮重工作量（从 header 查询）</td></tr>
+        <tr><td><code>GET /warehouse/workload/confirm-summary</code></td><td>确认出库工作量（从 header 查询）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十六章 -->
+<div class="section" id="s16">
+  <h2>十六、模块E：库位管理</h2>
+  <p>在 <code>dzwl_inbound_body</code> 新增 <code>warehouse_code</code> VARCHAR(20)。入库时由成品库人员在下拉列表中选择，仓库编码与引导牌编号一致（A、B、C、D）。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>编码</th><th>含义</th><th>关联引导牌</th></tr></thead>
+      <tbody>
+        <tr><td>A</td><td>冷拔无缝管仓库</td><td>成品库A</td></tr>
+        <tr><td>B</td><td>热轧无缝管仓库</td><td>成品库B</td></tr>
+        <tr><td>C</td><td>毛管仓库</td><td>成品库C</td></tr>
+        <tr><td>D</td><td>其他产品仓库</td><td>成品库D</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第十七章 -->
+<div class="section" id="s17">
+  <h2>十七、数据模型设计</h2>
+  <h3>17.1 表结构总览</h3>
+  <div class="rule-card">
+    <strong>需修改的现有表</strong>：<code>dzwl_inbound_body</code>（新增5字段）、<code>dzwl_tep_inbound_body</code>（新增2字段）<br>
+    <strong>需重新设计的现有表</strong>：<code>dzwl_outbound_header</code>、<code>dzwl_outbound_body</code><br>
+    <strong>需新增的表</strong>：<code>dzwl_tep_outbound_body</code>（库提临时出库表）、<code>dzwl_outbound_scan_record</code>（扫码记录表，逐件计工核心）
+  </div>
+
+  <h3>17.2 dzwl_inbound_body（修改：新增字段）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段名</th><th>类型</th><th>说明</th><th>默认值</th></tr></thead>
+      <tbody>
+        <tr><td><code>is_delivered</code></td><td>TINYINT(1)</td><td>是否已出库</td><td>0</td></tr>
+        <tr><td><code>delivery_outbound_id</code></td><td>BIGINT</td><td>关联出库登记单表体ID</td><td>NULL</td></tr>
+        <tr><td><code>delivery_time</code></td><td>DATETIME</td><td>出库时间</td><td>NULL</td></tr>
+        <tr><td><code>is_split</code></td><td>TINYINT(1)</td><td>是否已被拆件</td><td>0</td></tr>
+        <tr><td><code>warehouse_code</code></td><td>VARCHAR(20)</td><td>库位编码（A/B/C/D）</td><td>NULL</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>17.3 dzwl_outbound_header（登记单表头，终版）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段名</th><th>类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>BIGINT PK</td><td>主键，自增</td></tr>
+        <tr><td><code>outbound_no</code></td><td>VARCHAR(50)</td><td>登记单号（yyyyMMdd-6位随机码）</td></tr>
+        <tr><td><code>U8_delivery_order_no</code></td><td>VARCHAR(50)</td><td>U8发货单号</td></tr>
+        <tr><td><code>U8_dlid</code></td><td>BIGINT</td><td>U8发货单主键（dlid）</td></tr>
+        <tr><td><code>U8_cdlcode</code></td><td>VARCHAR(50)</td><td>U8发货单编号（cDLcode）</td></tr>
+        <tr><td><code>U8_ccuscode</code></td><td>VARCHAR(50)</td><td>U8客户编码</td></tr>
+        <tr><td><code>U8_cdepcode</code></td><td>VARCHAR(50)</td><td>U8部门编码</td></tr>
+        <tr><td><code>U8_cbustype</code></td><td>VARCHAR(50)</td><td>U8业务类型</td></tr>
+        <tr><td><code>customer_name</code></td><td>VARCHAR(100)</td><td>客户名称</td></tr>
+        <tr><td><code>plate_number</code></td><td>VARCHAR(20)</td><td>车牌号</td></tr>
+        <tr><td><code>tare_weight</code></td><td>DECIMAL(10,3)</td><td>皮重（吨）</td></tr>
+        <tr><td><code>gross_weight</code></td><td>DECIMAL(10,3)</td><td>毛重（吨）</td></tr>
+        <tr><td><code>net_weight</code></td><td>DECIMAL(10,3)</td><td>净重（吨）</td></tr>
+        <tr><td><code>weight_diff</code></td><td>DECIMAL(10,3)</td><td>重量差值（吨）</td></tr>
+        <tr><td><code>status</code></td><td>VARCHAR(30)</td><td>DRAFT / PENDING_TARE / TARE_DONE / PENDING_REVIEW / COMPLETED / CANCELLED</td></tr>
+        <tr><td><code>tare_operator_id</code></td><td>BIGINT</td><td>称皮重操作人ID</td></tr>
+        <tr><td><code>tare_operator_name</code></td><td>VARCHAR(50)</td><td>称皮重操作人姓名</td></tr>
+        <tr><td><code>confirm_operator_id</code></td><td>BIGINT</td><td>确认出库操作人ID</td></tr>
+        <tr><td><code>confirm_operator_name</code></td><td>VARCHAR(50)</td><td>确认出库操作人姓名</td></tr>
+        <tr><td><code>review_by</code></td><td>VARCHAR(50)</td><td>审核人</td></tr>
+        <tr><td><code>U8_saleout_id</code></td><td>VARCHAR(50)</td><td>U8销售出库单ID</td></tr>
+        <tr><td><code>remark</code></td><td>VARCHAR(500)</td><td>备注</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>17.5 dzwl_outbound_scan_record（扫码记录表，新增—逐件计工核心）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段名</th><th>类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>id</code></td><td>BIGINT PK</td><td>主键，自增</td></tr>
+        <tr><td><code>header_id</code></td><td>BIGINT</td><td>关联登记单表头ID</td></tr>
+        <tr><td><code>body_id</code></td><td>BIGINT</td><td>关联登记单表体ID</td></tr>
+        <tr><td><code>inbound_body_id</code></td><td>BIGINT</td><td>关联入库表体ID</td></tr>
+        <tr><td><code>track_number</code></td><td>VARCHAR(100)</td><td>合格证码</td></tr>
+        <tr><td><code>operator_id</code></td><td>BIGINT</td><td>扫合格证操作人ID</td></tr>
+        <tr><td><code>operator_name</code></td><td>VARCHAR(50)</td><td>扫合格证操作人姓名</td></tr>
+        <tr><td><code>scan_time</code></td><td>DATETIME</td><td>扫码时间</td></tr>
+        <tr><td><code>inbound_weight</code></td><td>DECIMAL(10,3)</td><td>该件入库重量（吨）</td></tr>
+        <tr><td><code>inbound_pieces</code></td><td>INT</td><td>该件支数</td></tr>
+        <tr><td><code>warehouse_code</code></td><td>VARCHAR(20)</td><td>库位编码（冗余，方便统计）</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="rule-card">
+    <strong>索引建议</strong>：<code>idx_header_id</code>（按登记单查询）、<code>idx_operator_time</code>（<code>operator_id</code>, <code>scan_time</code>）— 工作量统计核心索引
+  </div>
+</div>
+
+<!-- 第十八章 -->
+<div class="section" id="s18">
+  <h2>十八、API接口设计</h2>
+  <h3>18.1 PC端接口</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口</th><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>查询登记单列表</td><td>GET</td><td><code>/warehouse/outbound/list</code></td><td>分页，多条件筛选</td></tr>
+        <tr><td>获取登记单详情</td><td>GET</td><td><code>/warehouse/outbound/{id}</code></td><td>含表体 + scan_records</td></tr>
+        <tr><td>新建登记单</td><td>POST</td><td><code>/warehouse/outbound/create</code></td><td>选U8发货单 → 生成</td></tr>
+        <tr><td>获取U8发货单列表</td><td>GET</td><td><code>/warehouse/u8/delivery-orders</code></td><td>通过 callU8Api</td></tr>
+        <tr><td>获取U8发货单详情</td><td>GET</td><td><code>/warehouse/u8/delivery-order/{dlid}</code></td><td>含明细行</td></tr>
+        <tr><td>作废登记单</td><td>PUT</td><td><code>/warehouse/outbound/{id}/cancel</code></td><td>-</td></tr>
+        <tr><td>审核登记单</td><td>POST</td><td><code>/warehouse/outbound/{id}/review</code></td><td>生成 + 审核U8销售出库单</td></tr>
+        <tr><td>重新打印登记单</td><td>POST</td><td><code>/warehouse/outbound/{id}/reprint</code></td><td>原二维码失效，生成新二维码</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>18.2 小程序端接口</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口</th><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>扫码获取登记单</td><td>GET</td><td><code>/warehouse/outbound/scan?code={QR内容}</code></td><td>校验二维码+状态+角色</td></tr>
+        <tr><td>绑定皮重</td><td>PUT</td><td><code>/warehouse/outbound/{id}/bind-tare</code></td><td>记录 tare_operator</td></tr>
+        <tr><td><strong>扫码绑定合格证</strong></td><td>POST</td><td><code>/warehouse/outbound/{id}/scan-certificate</code></td><td><strong>核心</strong>：校验 + 插入 scan_record</td></tr>
+        <tr><td>移除已绑合格证</td><td>DELETE</td><td><code>/warehouse/outbound/{id}/scan-record/{recordId}</code></td><td>仅 TARE_DONE 状态允许</td></tr>
+        <tr><td>获取实时数据</td><td>GET</td><td><code>/warehouse/outbound/{id}/realtime</code></td><td>绑定列表 + 毛重 + 差值</td></tr>
+        <tr><td>确认出库</td><td>POST</td><td><code>/warehouse/outbound/{id}/confirm</code></td><td>净重分配 + 回写U8</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>18.3 扫码绑定合格证接口（核心）</h3>
+  <p><strong>POST</strong> <code>/warehouse/outbound/{headerId}/scan-certificate</code></p>
+  <pre class="json-block">请求体：
+{
+  "trackNumber": "合格证码"
+}
+
+响应：
+{
+  "code": 200,
+  "data": {
+    "scanRecordId": 123,
+    "productName": "冷拔无缝管",
+    "specification": "60×5",
+    "steelGrade": "20#",
+    "batchNumber": "P20260501001",
+    "inboundWeight": 2.500,
+    "inboundPieces": 15,
+    "warehouseCode": "A",
+    "operatorName": "张三"
+  }
+}</pre>
+</div>
+
+<!-- 第十九章 -->
+<div class="section" id="s19">
+  <h2>十九、U8接口集成方案</h2>
+  <h3>19.1 两条通信渠道</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>渠道</th><th>用途</th><th>调用方式</th><th>地址来源</th></tr></thead>
+      <tbody>
+        <tr><td><strong>U8数据API</strong></td><td>数据CRUD</td><td><code>callU8Api</code> 方法</td><td><code>u8_integration.api</code> + <code>u8_integration.auth</code></td></tr>
+        <tr><td><strong>U8审核API</strong></td><td>单据审核</td><td><code>POST</code> 直接调用</td><td><code>http://www.kingpipe.com:9004</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>19.2 创建登记单时「选U8发货单」</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口</th><th>方法</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/Consignment/GetPage</code></td><td>POST</td><td>分页查询发货单列表</td></tr>
+        <tr><td><code>/api/Consignment/GetDetail</code></td><td>POST</td><td>查询发货单详情（含明细行）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>19.3 确认出库时「回写U8发货单」</h3>
+  <p>调用 <code>/api/Consignment/save</code>，传入已有 <code>dlid</code> 即为更新。回写内容：实际称重重量 → <code>iquantity</code>。</p>
+
+  <h3>19.4 审核登记单时「生成U8销售出库单」</h3>
+  <p><strong>第一步</strong>：<code>POST /api/SaleOut/save</code> → 返回 <code>Data</code> = U8出库单ID</p>
+  <p><strong>第二步</strong>：审核销售出库单</p>
+  <pre>POST http://www.kingpipe.com:9004/api/saleout/Verify?accnum={accNum}&id={u8SaleOutId}
+Header: Auth = u8_integration.auth</pre>
+
+  <h3>19.6 U8接口快速参考</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>接口路径</th><th>方法</th><th>用途</th><th>调用方式</th></tr></thead>
+      <tbody>
+        <tr><td><code>/api/Consignment/GetPage</code></td><td>POST</td><td>查询发货单列表</td><td><code>callU8Api</code></td></tr>
+        <tr><td><code>/api/Consignment/GetDetail</code></td><td>POST</td><td>查询发货单详情</td><td><code>callU8Api</code></td></tr>
+        <tr><td><code>/api/Consignment/save</code></td><td>POST</td><td>保存/更新发货单</td><td><code>callU8Api</code></td></tr>
+        <tr><td><code>/api/SaleOut/save</code></td><td>POST</td><td>保存销售出库单</td><td><code>callU8Api</code></td></tr>
+        <tr><td><code>/api/saleout/Verify</code></td><td>POST</td><td>审核销售出库单</td><td>9004直接调用</td></tr>
+        <tr><td><code>/api/ProductIn/Verify</code></td><td>POST</td><td>审核产成品入库单</td><td>9004直接调用</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第二十章 -->
+<div class="section" id="s20">
+  <h2>二十、与现有系统的衔接</h2>
+  <h3>20.1 与入库系统的关联</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>关联点</th><th>设计</th></tr></thead>
+      <tbody>
+        <tr><td>合格证码</td><td><code>dzwl_inbound_body.TrackNumber</code> — 出库扫码校验</td></tr>
+        <tr><td><code>is_delivered = 1</code></td><td>防重复出库</td></tr>
+        <tr><td><code>is_split = 1</code></td><td>防重复拆件</td></tr>
+        <tr><td><code>warehouse_code</code></td><td>支撑装车路线规划</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>20.3 前端页面调整</h3>
+  <div class="rule-card">
+    <strong>开发范围</strong>：仅新版小程序 <code>wxma-v3</code>。旧版 <code>jbc-wxma</code> 不动。<br>
+    <code>outbound/index.vue</code> — <strong>废弃</strong>，新建「出库操作」替代<br>
+    <code>pickup/index.vue</code> — <strong>重构</strong>为库提出库（成品库人员操作）
+  </div>
+</div>
+
+<!-- 第二十一章 -->
+<div class="section" id="s21">
+  <h2>二十一、远期规划与扩展点</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>扩展点</th><th>预留方式</th></tr></thead>
+      <tbody>
+        <tr><td><strong>无人地磅值守</strong></td><td>扫码认领制已是基础：纸质单二维码即通行证</td></tr>
+        <tr><td>车牌识别自动写入</td><td><code>plate_number</code> 支持设备写入</td></tr>
+        <tr><td>自助终端</td><td>RESTful API，终端HTTP调用</td></tr>
+        <tr><td>道闸联动</td><td>确认出库后 WebHook</td></tr>
+        <tr><td>语音/LED引导</td><td>状态变更消息通道</td></tr>
+        <tr><td>退货功能</td><td><code>dzwl_outbound_header</code> 增加退货类型字段</td></tr>
+        <tr><td>报表生成</td><td>工作量统计数据为基础构建综合报表</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 第二十二章 -->
+<div class="section" id="s22">
+  <h2>二十二、专业建议与风险提示</h2>
+
+  <h3>22.1 并发扫码</h3>
+  <p>同一登记单二维码被两人同时扫：先扫者进入操作（Redis锁30s过期），后扫者提示「该登记单正在被 XXX 操作中」。</p>
+
+  <h3>22.4 U8依赖</h3>
+  <p>U8不可用时 MES 本地不中断。待 U8 恢复后通过补同步机制将本地数据推送到 U8。</p>
+
+  <h3>22.5 审核接口方案（已确认）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>单据类型</th><th>审核接口</th></tr></thead>
+      <tbody>
+        <tr><td>产成品入库单</td><td><code>/api/ProductIn/Verify?accnum={accNum}&id={id}</code></td></tr>
+        <tr><td>销售出库单</td><td><code>/api/saleout/Verify?accnum={accNum}&id={id}</code></td></tr>
+        <tr><td>其他入库单</td><td><code>/api/OtherIn/Verify?accnum={accNum}&id={id}</code></td></tr>
+        <tr><td>其他出库单</td><td><code>/api/OtherOut/Verify?accnum={accNum}&id={id}</code></td></tr>
+        <tr><td>采购入库单</td><td><code>/api/PuStoreIn/Verify?accnum={accNum}&id={id}</code></td></tr>
+        <tr><td>材料出库单</td><td><code>/api/MaterialOut/Verify?accnum={accNum}&id={id}</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>22.6 幂等性控制</h3>
+  <p>审核登记单的接口应加 <code>@Idempotent</code> 注解，防止重复生成U8出库单。</p>
+</div>
+
+<!-- 第二十三章 附录 -->
+<div class="section" id="s23">
+  <h2>二十三、附录</h2>
+
+  <h3>A. 术语对照</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>术语</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>登记单</td><td>MES出库操作单据，号段 yyyyMMdd-6位随机码</td></tr>
+        <tr><td>发货单（Consignment）</td><td>U8预发货单据，含客户、车牌号、计划发货产品</td></tr>
+        <tr><td>销售出库单（SaleOut）</td><td>U8正式出库单据，涉及库存扣减和财务核算</td></tr>
+        <tr><td>合格证（TrackNumber）</td><td>产品入库标签，出库扫码依据</td></tr>
+        <tr><td>扫码认领制</td><td>谁扫纸质登记单二维码谁操作，系统自动记录</td></tr>
+        <tr><td>一票到底</td><td>同一张纸质登记单贯穿全流程</td></tr>
+        <tr><td>逐件计工</td><td>每扫一个合格证独立记录操作人</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>C. 接口文档清单</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>文档</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>U8销售发货单接口.openapi.json</code></td><td>U8发货单查询/Save接口</td></tr>
+        <tr><td><code>U8销售出库单接口.openapi.json</code></td><td>U8销售出库单Save/查询接口</td></tr>
+        <tr><td><code>U8单据审核.openapi.json</code></td><td>6种单据审核接口</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>D. 后续待开发</h3>
+  <ul>
+    <li>退货功能</li>
+    <li>报表生成（含装车吨位日报/月报）</li>
+    <li>自助终端对接</li>
+    <li>车牌识别集成</li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大宗物料销售出库 - 核心业务流程图</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            font-size: 15px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* 顶部 */
+        .hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: #fff;
+            border-radius: 12px;
+            padding: 48px 40px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero .meta {
+            display: flex;
+            gap: 24px;
+            font-size: 14px;
+            opacity: 0.85;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hero .quote {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            padding: 14px 18px;
+            margin-top: 20px;
+            font-size: 13.5px;
+            line-height: 1.7;
+        }
+
+        /* 目录 */
+        .toc {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .toc h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: var(--primary);
+        }
+
+        .toc ol {
+            columns: 2;
+            column-gap: 32px;
+            padding-left: 20px;
+        }
+
+        .toc li {
+            margin-bottom: 6px;
+            font-size: 14px;
+            break-inside: avoid;
+        }
+
+        .toc a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        /* 章节 */
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 36px 40px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+
+        .section h2 {
+            font-size: 22px;
+            color: var(--primary);
+            border-left: 4px solid var(--primary);
+            padding-left: 14px;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .section h3 {
+            font-size: 17px;
+            color: #34495e;
+            margin: 28px 0 12px;
+        }
+
+        /* 表格 */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 18px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 600px;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        thead th {
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: #e11d48;
+        }
+
+        /* Mermaid 图表容器 */
+        .mermaid-wrap {
+            background: #fafbfc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            margin: 20px 0;
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .mermaid-wrap .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .mermaid-wrap .mermaid svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* 加载/错误提示 */
+        .mermaid-loading,
+        .mermaid-error {
+            padding: 20px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .mermaid-error {
+            color: #dc2626;
+        }
+
+        /* 状态图标签 */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-blue {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px 12px 40px;
+            }
+
+            .hero {
+                padding: 28px 20px;
+            }
+
+            .hero h1 {
+                font-size: 22px;
+            }
+
+            .section {
+                padding: 24px 20px;
+            }
+
+            .toc ol {
+                columns: 1;
+            }
+
+            .hero .meta {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .section {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                break-inside: avoid;
+            }
+
+            .hero {
+                background: #1e3a5f !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="hero">
+            <h1>大宗物料销售出库 — 核心业务流程图</h1>
+            <div class="meta">
+                <span>📅 创建日期：2026-05-15</span>
+                <span>✍️ 作者：wr</span>
+                <span>📋 版本：1.0</span>
+            </div>
+            <div class="quote">
+                基于《大宗物料销售出库项目需求v4.0》第5-10章绘制
+            </div>
+        </div>
+
+        <nav class="toc">
+            <h2>📑 目录</h2>
+            <ol>
+                <li><a href="#s1">整体流程概览</a></li>
+                <li><a href="#s2">步骤①：创建登记单 + 打印</a></li>
+                <li><a href="#s3">步骤②：称皮重</a></li>
+                <li><a href="#s4">步骤③：装车扫码</a></li>
+                <li><a href="#s5">步骤④：称毛重 + 确认出库</a></li>
+                <li><a href="#s6">步骤⑤：审核生成U8出库单</a></li>
+                <li><a href="#s7">库提拆件流程</a></li>
+                <li><a href="#s8">作废与重新打印</a></li>
+                <li><a href="#s9">异常处理分支</a></li>
+                <li><a href="#s10">U8完整交互时序</a></li>
+                <li><a href="#s11">状态流转总图</a></li>
+                <li><a href="#s12">角色与操作对照</a></li>
+                <li><a href="#s13">关键校验规则汇总</a></li>
+            </ol>
+        </nav>
+
+        <!-- 一、整体流程概览 -->
+        <div class="section" id="s1">
+            <h2>一、整体流程概览</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    subgraph PC端["🖥️ PC端（结算中心）"]
+                    A[新建登记单] --> B[选择U8发货单]
+                    B --> C[系统拉取预填数据]
+                    C --> D[保存]
+                    D --> E[生成登记单号+二维码+路线]
+                    E --> F[打印纸质登记单]
+                    F --> G[交付司机/装卸工]
+                    end
+
+                    subgraph 小程序["📱 小程序（装卸工/成品库/地磅室）"]
+                    G --> H[步骤② 扫码称皮重]
+                    H --> I[步骤③ 装车扫码]
+                    I --> J[步骤④ 称毛重+确认出库]
+                    end
+
+                    subgraph PC审核["🖥️ PC端（结算中心）"]
+                    J --> K[步骤⑤ 审核]
+                    K --> L[保存U8出库单]
+                    L --> M[审核U8出库单]
+                    M --> N[开具出门证]
+                    N --> O[完成]
+                    end
+
+                    style A fill:#4CAF50,color:#fff
+                    style H fill:#2196F3,color:#fff
+                    style I fill:#FF9800,color:#fff
+                    style J fill:#FF9800,color:#fff
+                    style K fill:#9C27B0,color:#fff
+                    style O fill:#4CAF50,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 二、步骤① -->
+        <div class="section" id="s2">
+            <h2>二、步骤①：创建登记单 + 打印</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A["结算中心点击「新建登记单」"] --> B[调用U8获取发货单列表]
+                    B --> B1["POST /api/Consignment/GetPage<br />条件: 已保存未完成出库"]
+                    B1 --> C{发货单列表}
+                    C -->|有数据| D[选择发货单]
+                    C -->|无数据| C1["提示「无可用发货单」"]
+                    D --> E[调用U8获取发货单详情]
+                    E --> E1["POST /api/Consignment/GetDetail<br />返回: 表头+明细行"]
+                    E1 --> F[系统自动预填]
+
+                    subgraph 预填数据["自动预填"]
+                    F1["表头: 客户/部门/车牌号/日期"]
+                    F2["表体: 存货编码/名称/规格/钢号/标准/数量"]
+                    F3["存储U8关联字段: dlid/cDLcode/ccuscode等"]
+                    end
+
+                    F --> G["点击「保存」"]
+                    G --> H[系统自动处理]
+
+                    subgraph 自动处理["系统自动处理"]
+                    H1["生成登记单号: yyyyMMdd-6位随机码"]
+                    H2["生成二维码 (QRCodeUtils)"]
+                    H3[查询库位计算装车路线]
+                    H4["状态 → PENDING_TARE"]
+                    H5["保存 dzwl_outbound_header + body"]
+                    end
+
+                    H --> I[打印纸质登记单]
+                    I --> I1[后端返回二维码base64 + 登记单HTML]
+                    I1 --> I2["前端渲染 → window.print()"]
+                    I2 --> J[纸质单交付司机/装卸工]
+
+                    style A fill:#4CAF50,color:#fff
+                    style G fill:#4CAF50,color:#fff
+                    style J fill:#2196F3,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 三、步骤② -->
+        <div class="section" id="s3">
+            <h2>三、步骤②：称皮重</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A[操作者打开小程序] --> B[扫码获取登记单]
+                    B --> C{校验1: 二维码有效?}
+                    C -->|无效| C1["提示「二维码无效或已过期」"]
+                    C -->|有效| D{校验2: 状态=PENDING_TARE?}
+                    D -->|否| D1["提示「当前状态不允许此操作」"]
+                    D -->|是| E{校验3: 操作者有角色?}
+                    E -->|否| E1["提示「无操作权限」"]
+                    E -->|是| F[打开称皮重界面]
+
+                    F --> G[核对车牌号]
+                    G --> H[引导车辆上磅]
+                    H --> I["点击「获取皮重」"]
+                    I --> I1["POST /warehouse/weigh/getWeight<br />→ IWeighService →
+                    地磅硬件<br />https://www.kingpipe.com:17601/process_number"]
+                    I1 --> I2[实时显示当前重量]
+                    I2 -->|等待稳定| I3["点击「绑定为皮重」"]
+
+                    I3 --> J[系统记录]
+                    subgraph 系统记录["自动记录"]
+                    J1["tare_operator_id / name"]
+                    J2["tare_weight = 当前重量"]
+                    J3["tare_operation_time = 当前时间"]
+                    end
+
+                    J --> K["状态: PENDING_TARE → TARE_DONE"]
+                    K --> L[纸质单还给司机/操作者]
+
+                    style B fill:#2196F3,color:#fff
+                    style I3 fill:#FF9800,color:#fff
+                    style K fill:#4CAF50,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 四、步骤③ -->
+        <div class="section" id="s4">
+            <h2>四、步骤③：装车扫码</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A["操作者(装卸工/成品库人员)在小程序扫码"] --> B{校验}
+                    B -->|二维码/状态/角色| B1["状态=TARE_DONE ✓"]
+                    B1 --> C[打开装车扫码界面]
+
+                    C --> D[逐件装车+立即扫合格证码]
+
+                    D --> E{校验合格证}
+                    E -->|无效| E1["提示「合格证无效」"]
+                    E -->|已出库| E2["提示「该产品已出库(时间:XXX)」"]
+                    E -->|合同号不匹配| E3["提示「合同号不匹配」"]
+                    E -->|校验通过| F["向 dzwl_outbound_scan_record 插入记录"]
+
+                    subgraph 扫描记录["scan_record 字段"]
+                    F1["header_id: 登记单ID"]
+                    F2["body_id: 表体ID"]
+                    F3["inbound_body_id: 入库表体ID"]
+                    F4["track_number: 合格证码"]
+                    F5["operator_id / operator_name: 当前操作人"]
+                    F6["scan_time: 扫码时间"]
+                    F7["inbound_weight: 该件入库重量"]
+                    F8["inbound_pieces: 该件支数"]
+                    F9["warehouse_code: 库位编码(冗余)"]
+                    end
+
+                    F --> G[更新装车进度]
+                    G --> H[前端实时汇总]
+
+                    subgraph 实时汇总["显示"]
+                    H1["已绑: X 件"]
+                    H2["入库重量合计: XX.XX 吨"]
+                    H3["多人协作: 各自名下独立记录"]
+                    end
+
+                    H --> I{是否装车完毕?}
+                    I -->|继续装车| D
+                    I -->|完毕| J[装车完成]
+                    J --> K[纸质单还给司机/操作者]
+
+                    style D fill:#FF9800,color:#fff
+                    style F fill:#4CAF50,color:#fff
+                    style I fill:#9C27B0,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 五、步骤④ -->
+        <div class="section" id="s5">
+            <h2>五、步骤④：称毛重 + 确认出库</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A[司机开车回地磅] --> B[操作者扫码进入界面]
+                    B --> B1["状态=TARE_DONE ✓"]
+                    B1 --> C[核对已绑定列表]
+
+                    C --> D["点击「获取毛重」<br />调用 IWeighService"]
+                    D --> E[系统自动计算]
+
+                    subgraph 自动计算["系统自动计算"]
+                    E1["毛重 gross_weight = 地磅读数"]
+                    E2["净重 net_weight = 毛重 - 皮重"]
+                    E3["差值 weight_diff = 净重 - 入库重量合计"]
+                    end
+
+                    E --> F{"差值 ≤ 0.2吨?"}
+
+                    F -->|否❌| F1["差值: X.XX吨 (红色醒目显示)"]
+                    F1 --> F2["「确认出库」按钮置灰"]
+                    F2 --> F3["提示「重量差异过大(X.XX吨)，请检查装车产品或合格证」"]
+                    F3 --> F4[返回成品库核对]
+                    F4 --> D
+
+                    F -->|是✅| G["差值: X.XX吨 (绿色醒目显示)"]
+                    G --> H["「确认出库」按钮可用"]
+                    H --> I["点击「确认出库」"]
+                    I --> J[二次确认弹窗]
+                    J -->|取消| H
+                    J -->|确认| K[系统执行确认操作]
+
+                    subgraph 确认操作["确认出库操作"]
+                    K1["分配净重到每件产品<br />(按入库重量比例分配)"]
+                    K2["标记 is_delivered = 1<br />dzwl_inbound_body 每件记录"]
+                    K3["回写U8发货单<br />POST /api/Consignment/save<br />(callU8Api, 3次重试)"]
+                    K4["记录 confirm_operator_*"]
+                    K5["状态: TARE_DONE → PENDING_REVIEW"]
+                    end
+
+                    K --> L[操作完成]
+
+                    style D fill:#2196F3,color:#fff
+                    style F fill:#9C27B0,color:#fff
+                    style I fill:#FF5722,color:#fff
+                    style K5 fill:#4CAF50,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 六、步骤⑤ -->
+        <div class="section" id="s6">
+            <h2>六、步骤⑤：审核生成U8出库单</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A["结算中心筛选「待审核」"] --> B[查看登记单详情]
+                    B --> C[确认数据完整]
+                    C --> D["点击「审核」"]
+
+                    D --> E{数据完整性检查}
+                    E -->|不完整| E1["提示「请完善XXX信息」"]
+                    E -->|完整| F["第一步: 保存U8销售出库单"]
+
+                    F --> F1["POST /api/SaleOut/save<br />callU8Api (3次重试)"]
+                    F1 --> F2{保存成功?}
+
+                    F2 -->|失败| F3["U8RetryHandler重试<br />3次×1秒间隔"]
+                    F3 --> F4{最终结果?}
+                    F4 -->|仍失败| F5["提示「U8保存失败，请稍后重试」<br />不阻塞审核，记录待补推"]
+
+                    F2 -->|成功| G["获取 u8SaleOutId<br />记录到 U8_saleout_id"]
+                    F4 -->|成功| G
+
+                    G --> H["第二步: 审核U8销售出库单"]
+                    H --> H1["POST
+                    http://www.kingpipe.com:9004<br />/api/saleout/Verify<br />?accnum={accNum}&id={u8SaleOutId}<br />Header:
+                    Auth = u8_integration.auth"]
+                    H1 --> H2{审核成功?}
+
+                    H2 -->|失败| H3["提示「U8审核失败: XXX」<br />记录日志，支持手动重审"]
+                    H2 -->|成功| I[审核完成]
+
+                    I --> I1["状态: PENDING_REVIEW → COMPLETED"]
+                    I1 --> I2["二维码失效"]
+                    I2 --> I3["开具出门证"]
+                    I3 --> J[完成]
+
+                    style D fill:#9C27B0,color:#fff
+                    style F fill:#2196F3,color:#fff
+                    style H fill:#2196F3,color:#fff
+                    style J fill:#4CAF50,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 七、库提拆件流程 -->
+        <div class="section" id="s7">
+            <h2>七、库提拆件流程</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A["成品库人员扫原有合格证码"] --> B[获取该件产品信息]
+                    B --> C{原有件 is_split?}
+                    C -->|已拆件| C1["提示「该件已拆件」"]
+                    C -->|未拆件| D[进入拆件界面]
+
+                    D --> E["填写拆出数量<br />支数/重量"]
+                    E --> F[系统自动生成新合格证码]
+                    F --> F1["格式: 原TrackNumber-S{序号}<br />例: ZS001-S1, ZS001-S2"]
+
+                    F1 --> G[生成两笔临时记录]
+
+                    subgraph 拆件记录["两笔临时记录"]
+                    G1["出库件 → dzwl_tep_outbound_body<br />重量 = 拆出重量<br />打印新合格证"]
+                    G2["剩件 → dzwl_tep_inbound_body<br />source_type = 'SPLIT'<br />重量 = 原重量 - 拆出重量<br />打印新合格证"]
+                    end
+
+                    G --> H["原有件 is_split = 1"]
+
+                    H --> I["成品库人员执行存盘"]
+                    I --> I1["出库存盘 → U8产成品出库单"]
+                    I --> I2["入库存盘 → U8产成品入库单"]
+
+                    I1 --> J[完成]
+                    I2 --> J
+
+                    style A fill:#FF9800,color:#fff
+                    style H fill:#F44336,color:#fff
+                    style J fill:#4CAF50,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 八、作废与重新打印 -->
+        <div class="section" id="s8">
+            <h2>八、作废与重新打印</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    A[结算中心] --> B{触发场景}
+
+                    B -->|场景1: 作废| C[选择登记单]
+                    C --> C1{状态判断}
+                    C1 -->|已完成| C2["提示「已完成登记单不可作废」"]
+                    C1 -->|非终态| D["作废操作<br />状态 → CANCELLED"]
+                    D --> D1["二维码失效"]
+
+                    B -->|场景2: 纸质单丢失| E["重新打印"]
+                    E --> E1["原二维码自动失效"]
+                    E1 --> E2["QRCodeUtils 生成新二维码"]
+                    E2 --> E3["更新 dzwl_outbound_header.QR_code"]
+                    E3 --> E4["前端渲染 → window.print()"]
+
+                    style D fill:#F44336,color:#fff
+                    style E3 fill:#2196F3,color:#fff
+                </div>
+            </div>
+        </div>
+
+        <!-- 九、异常处理分支 -->
+        <div class="section" id="s9">
+            <h2>九、异常处理分支</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    flowchart TD
+                    subgraph 称重异常["⚠️ 称重异常"]
+                    W1["磅差 > 0.2t"] --> W1a["提示检查产品/合格证"]
+                    W1a --> W1b[返回成品库核对]
+                    W2[地磅连接失败] --> W2a["显示「地磅连接失败」"]
+                    W2a --> W2b[手动入口 + 求助于地磅室]
+                    end
+
+                    subgraph 扫码异常["⚠️ 扫码异常"]
+                    S1[合格证已出库] --> S1a["提示「已出库(时间XXX)」"]
+                    S1a --> S1b[换未出库产品]
+                    S2[合同号不匹配] --> S2a["提示差异详情"]
+                    S2a --> S2b[换正确产品]
+                    S3["二维码被多人同时扫"] --> S3a["Redis锁(30s过期)"]
+                    S3a --> S3b["后扫者提示「正在被XXX操作中」"]
+                    end
+
+                    subgraph U8异常["⚠️ U8异常"]
+                    U1[U8超时] --> U1a["提示「U8暂不可用，本地已保存」"]
+                    U1a --> U1b[继续操作不中断]
+                    U1b --> U1c["U8RetryHandler: 3次×1秒"]
+                    U1c --> U1d{最终成功?}
+                    U1d -->|否| U1e["记录补推日志，待后续补同步"]
+                    U1d -->|是| U1f[操作继续]
+                    end
+
+                    subgraph 纸质单异常["⚠️ 纸质单异常"]
+                    P1[司机找不到成品库] --> P1a["纸质单上有库位编号+路线指引"]
+                    P1b[现场引导牌指引]
+                    P2[纸质单途中丢失] --> P2a["结算中心重新打印"]
+                    P2a --> P2b["旧码失效 → 新码生效"]
+                    end
+
+                    subgraph 库位异常["⚠️ 库位异常"]
+                    C1[部分产品未指定库位] --> C1a["提示「无法计算装车路线」"]
+                    C1a --> C1b[联系成品库人员补录warehouse_code]
+                    end
+                </div>
+            </div>
+        </div>
+
+        <!-- 十、U8完整交互时序 -->
+        <div class="section" id="s10">
+            <h2>十、U8完整交互时序</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    sequenceDiagram
+                    participant PC as 结算中心(PC)
+                    participant MES as MES后端
+                    participant U8 as U8 ERP (9004)
+                    participant Scale as 地磅硬件(17601)
+                    participant Mini as 小程序
+
+                    Note over PC,U8: === 阶段1: 创建登记单 (PC端) ===
+                    PC->>MES: 新建登记单
+                    MES->>U8: POST /api/Consignment/GetPage (callU8Api)
+                    U8-->>MES: 发货单列表
+                    MES->>U8: POST /api/Consignment/GetDetail (callU8Api)
+                    U8-->>MES: 发货单详情(含明细行idlsid)
+                    MES->>MES: 生成登记单号+二维码(QRCodeUtils)+路线
+                    MES->>MES: INSERT dzwl_outbound_header + body
+                    MES->>MES: 状态: PENDING_TARE
+                    MES-->>PC: 返回登记单详情(含二维码base64)
+                    PC->>PC: 浏览器打印 window.print()
+
+                    Note over Mini,Scale: === 阶段2: 称皮重 (小程序) ===
+                    Mini->>MES: 扫码获取登记单
+                    MES->>MES: 校验二维码+状态(PENDING_TARE)+角色
+                    MES-->>Mini: 登记单详情
+                    Mini->>MES: POST /warehouse/weigh/getWeight
+                    MES->>Scale: POST /process_number (IWeighService)
+                    Scale-->>MES: WeighResult{success, weight}
+                    MES-->>Mini: 实时重量
+                    Mini->>MES: PUT /warehouse/outbound/{id}/bind-tare
+                    MES->>MES: 记录 tare_operator + tare_weight
+                    MES->>MES: 状态: TARE_DONE
+
+                    Note over Mini: === 阶段3: 装车扫码 (多人协作) ===
+                    loop 逐件装车
+                    Mini->>MES: POST /warehouse/outbound/{id}/scan-certificate<br />{trackNumber}
+                    MES->>MES: 校验(有效性/已出库/合同号)
+                    MES->>MES: INSERT dzwl_outbound_scan_record<br />(operator_id, track_number, weight...)
+                    MES-->>Mini: {scanRecordId, productInfo}
+                    end
+
+                    Note over Mini,Scale,U8: === 阶段4: 称毛重+确认出库 (小程序) ===
+                    Mini->>MES: 获取实时数据
+                    MES->>Scale: POST /process_number (IWeighService)
+                    Scale-->>MES: WeighResult (毛重)
+                    MES->>MES: 计算净重+差值
+                    MES-->>Mini: {gross_weight, net_weight, weight_diff, bindList}
+                    Mini->>MES: POST /warehouse/outbound/{id}/confirm<br />(二次确认)
+                    MES->>MES: 净重分配 + 标记is_delivered
+                    MES->>U8: POST /api/Consignment/save (callU8Api 回写重量)
+                    U8-->>MES: 保存成功
+                    MES->>MES: 记录confirm_operator
+                    MES->>MES: 状态: PENDING_REVIEW
+                    MES-->>Mini: 确认成功
+
+                    Note over PC,U8: === 阶段5: 审核 (PC端) ===
+                    PC->>MES: POST /warehouse/outbound/{id}/review
+                    MES->>MES: @Idempotent 幂等检查
+                    MES->>U8: POST /api/SaleOut/save (callU8Api)
+                    U8-->>MES: u8SaleOutId
+                    MES->>U8: POST /api/saleout/Verify?accnum=X&id=Y (9004直接调用)
+                    U8-->>MES: {success:true}
+                    MES->>MES: 状态: COMPLETED + 二维码失效
+                    MES-->>PC: 审核成功 + 出门证
+                </div>
+            </div>
+        </div>
+
+        <!-- 状态流转总图 -->
+        <div class="section" id="s11">
+            <h2>状态流转总图</h2>
+            <div class="mermaid-wrap">
+                <div class="mermaid">
+                    stateDiagram-v2
+                    [*] --> DRAFT: PC端新建
+                    DRAFT --> PENDING_TARE: 保存+生成二维码+计算路线
+                    DRAFT --> CANCELLED: 结算中心作废
+
+                    PENDING_TARE --> TARE_DONE: 扫码称皮重(小程序)
+                    PENDING_TARE --> CANCELLED: 结算中心作废
+
+                    TARE_DONE --> PENDING_REVIEW: 装车扫码+称毛重+确认出库(小程序)
+                    TARE_DONE --> CANCELLED: 结算中心作废
+
+                    PENDING_REVIEW --> COMPLETED: 结算中心审核(PC)
+
+                    COMPLETED --> [*]: 二维码失效+出门证+归档
+                    CANCELLED --> [*]: 二维码失效+归档
+                </div>
+            </div>
+        </div>
+
+        <!-- 角色与操作对照 -->
+        <div class="section" id="s12">
+            <h2>角色与操作对照</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>步骤</th>
+                            <th>角色</th>
+                            <th>终端</th>
+                            <th>操作</th>
+                            <th>关键记录</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="text-align:center;font-weight:700;">①</td>
+                            <td>结算中心</td>
+                            <td>PC</td>
+                            <td>建登记单 → 打印</td>
+                            <td>登记单号+二维码+路线</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;font-weight:700;">②</td>
+                            <td>装卸工/成品库人员/地磅室(任一人)</td>
+                            <td>小程序</td>
+                            <td>扫码 → 称皮重 → 绑定</td>
+                            <td><code>tare_operator_*</code></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;font-weight:700;">③</td>
+                            <td>装卸工/成品库人员(多人)</td>
+                            <td>小程序</td>
+                            <td>扫码 → 逐件装车 → 扫合格证</td>
+                            <td><code>scan_record</code>(每件独立)</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;font-weight:700;">④</td>
+                            <td>装卸工/成品库人员/地磅室(任一人)</td>
+                            <td>小程序</td>
+                            <td>扫码 → 称毛重 → 确认出库</td>
+                            <td><code>confirm_operator_*</code> + 回写U8发货单</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:center;font-weight:700;">⑤</td>
+                            <td>结算中心</td>
+                            <td>PC</td>
+                            <td>审核</td>
+                            <td>保存+审核U8出库单</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 关键校验规则汇总 -->
+        <div class="section" id="s13">
+            <h2>关键校验规则汇总</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>校验点</th>
+                            <th>规则</th>
+                            <th>不通过处理</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>扫码权限</strong></td>
+                            <td>二维码有效 + 状态匹配 + 操作者有角色</td>
+                            <td>提示无权限</td>
+                        </tr>
+                        <tr>
+                            <td><strong>合格证有效性</strong></td>
+                            <td>合格证存在 + 未出库 + 未拆件</td>
+                            <td>提示具体原因</td>
+                        </tr>
+                        <tr>
+                            <td><strong>合同号匹配</strong></td>
+                            <td>合格证合同号 = 登记单合同号</td>
+                            <td>提示不匹配</td>
+                        </tr>
+                        <tr>
+                            <td><strong>重量校验</strong></td>
+                            <td><code>|净重 - 入库重量合计| ≤ 0.2吨</code></td>
+                            <td>返回成品库核对</td>
+                        </tr>
+                        <tr>
+                            <td><strong>并发扫码</strong></td>
+                            <td>Redis锁30s，同一登记单同一时间仅1人操作</td>
+                            <td>后扫者提示被占用</td>
+                        </tr>
+                        <tr>
+                            <td><strong>审核幂等</strong></td>
+                            <td><code>@Idempotent(expireTime=10)</code></td>
+                            <td>防止重复生成U8出库单</td>
+                        </tr>
+                        <tr>
+                            <td><strong>U8回写重试</strong></td>
+                            <td><code>U8RetryHandler</code>: 3次×1秒</td>
+                            <td>失败不阻塞，记录补推</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+            flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
+            sequence: { useMaxWidth: true, showSequenceNumbers: false },
+            state: { useMaxWidth: true }
+        });
+    </script>
+
+</body>
+
+</html>
