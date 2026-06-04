@@ -294,6 +294,91 @@
                 -webkit-print-color-adjust: exact;
             }
         }
+    /* 浮动导航 */
+  .float-nav {
+    position: fixed;
+    right: 24px;
+    bottom: 40px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .float-nav a, .float-nav button {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s cubic-bezier(0.19,1,0.22,1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    line-height: 1;
+    padding: 0;
+  }
+  .float-nav a:hover, .float-nav button:hover {
+    background: rgba(59, 130, 246, 0.8);
+    color: #fff;
+    transform: scale(1.05);
+  }
+  .float-nav .toc-toggle {
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    font-family: inherit;
+  }
+  .float-toc-panel {
+    position: fixed;
+    right: 80px;
+    bottom: 40px;
+    z-index: 999;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 16px 0;
+    max-height: 60vh;
+    width: 240px;
+    overflow-y: auto;
+    transform: translateX(20px) translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.19,1,0.22,1);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .float-toc-panel.show {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .float-toc-panel a {
+    display: block;
+    padding: 6px 20px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .float-toc-panel a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.04);
+    border-left-color: #3b82f6;
+  }
+  .float-toc-panel::-webkit-scrollbar { width: 4px; }
+  .float-toc-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
     </style>
 </head>
 
@@ -301,12 +386,8 @@
     <div class="container">
 
         <div class="hero">
-            <div style="text-align: right; margin-bottom: 12px;">
-                <a href="index.html" style="color: rgba(255,255,255,0.8); text-decoration: underline; font-size: 14px;">← 返回首页</a>
-            </div>
             <h1>大宗物料销售出库 — 核心业务流程图</h1>
             <div class="meta">
-                <span>📅 创建日期：2026-05-15</span>
                 <span>✍️ 作者：wr</span>
                 <span>📋 版本：1.0</span>
             </div>
@@ -754,9 +835,9 @@
 
                     Note over Mini: === 阶段3: 装车扫码 (多人协作) ===
                     loop 逐件装车
-                    Mini->>MES: POST /warehouse/outbound/{id}/scan-certificate<br />{trackNumber}
+                    Mini->>MES: POST /warehouse/outbound/{id}/scan-certificate ({trackNumber})
                     MES->>MES: 校验(有效性/已出库/合同号)
-                    MES->>MES: INSERT dzwl_outbound_scan_record<br />(operator_id, track_number, weight...)
+                    MES->>MES: INSERT dzwl_outbound_scan_record (operator_id, track_number, weight...)
                     MES-->>Mini: {scanRecordId, productInfo}
                     end
 
@@ -766,7 +847,7 @@
                     Scale-->>MES: WeighResult (毛重)
                     MES->>MES: 计算净重+差值
                     MES-->>Mini: {gross_weight, net_weight, weight_diff, bindList}
-                    Mini->>MES: POST /warehouse/outbound/{id}/confirm<br />(二次确认)
+                    Mini->>MES: POST /warehouse/outbound/{id}/confirm (二次确认)
                     MES->>MES: 净重分配 + 标记is_delivered
                     MES->>U8: POST /api/Consignment/save (callU8Api 回写重量)
                     U8-->>MES: 保存成功
@@ -932,6 +1013,26 @@
         });
     </script>
 
+<div class="float-nav">
+  <a href="index.html" title="返回首页">⌂</a>
+  <a href="#" title="返回顶部" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
+  <button class="toc-toggle" title="目录" onclick="document.querySelector('.float-toc-panel').classList.toggle('show')">≡</button>
+</div>
+<div class="float-toc-panel" onclick="this.classList.remove('show')">
+  <a href="#s1">一、整体流程概览</a>
+  <a href="#s2">二、步骤①：创建登记单 + 打印</a>
+  <a href="#s3">三、步骤②：称皮重</a>
+  <a href="#s4">四、步骤③：装车扫码</a>
+  <a href="#s5">五、步骤④：称毛重 + 确认出库</a>
+  <a href="#s6">六、步骤⑤：审核生成U8出库单</a>
+  <a href="#s7">七、库提拆件流程</a>
+  <a href="#s8">八、作废与重新打印</a>
+  <a href="#s9">九、异常处理分支</a>
+  <a href="#s10">十、U8完整交互时序</a>
+  <a href="#s11">十一、状态流转总图</a>
+  <a href="#s12">十二、角色与操作对照</a>
+  <a href="#s13">十三、关键校验规则汇总</a>
+</div>
 </body>
 
 </html>

@@ -240,18 +240,99 @@
     .section { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
     .hero { background: #1e3a5f !important; -webkit-print-color-adjust: exact; }
   }
+/* 浮动导航 */
+  .float-nav {
+    position: fixed;
+    right: 24px;
+    bottom: 40px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .float-nav a, .float-nav button {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.3s cubic-bezier(0.19,1,0.22,1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    line-height: 1;
+    padding: 0;
+  }
+  .float-nav a:hover, .float-nav button:hover {
+    background: rgba(59, 130, 246, 0.8);
+    color: #fff;
+    transform: scale(1.05);
+  }
+  .float-nav .toc-toggle {
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    font-family: inherit;
+  }
+  .float-toc-panel {
+    position: fixed;
+    right: 80px;
+    bottom: 40px;
+    z-index: 999;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 16px 0;
+    max-height: 60vh;
+    width: 240px;
+    overflow-y: auto;
+    transform: translateX(20px) translateY(10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.19,1,0.22,1);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .float-toc-panel.show {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .float-toc-panel a {
+    display: block;
+    padding: 6px 20px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .float-toc-panel a:hover {
+    color: #fff;
+    background: rgba(255,255,255,0.04);
+    border-left-color: #3b82f6;
+  }
+  .float-toc-panel::-webkit-scrollbar { width: 4px; }
+  .float-toc-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 </style>
 </head>
 <body>
 <div class="container">
 
 <div class="hero">
-  <div style="text-align: right; margin-bottom: 12px;">
-    <a href="index.html" style="color: rgba(255,255,255,0.8); text-decoration: underline; font-size: 14px;">← 返回首页</a>
-  </div>
   <h1>大宗物料销售出库项目需求 v4.0</h1>
   <div class="meta">
-    <span>📅 更新日期：2026-05-13</span>
     <span>✍️ 作者：wr</span>
     <span>📋 版本：4.0（终版）</span>
   </div>
@@ -294,15 +375,15 @@
   <h2>版本演进</h2>
   <div class="table-wrap">
     <table class="version-table">
-      <thead><tr><th>版本</th><th>日期</th><th>核心变化</th></tr></thead>
+      <thead><tr><th>版本</th><th>核心变化</th></tr></thead>
       <tbody>
-        <tr><td>v1.0</td><td>2026-04</td><td>结算中心初稿</td></tr>
-        <tr><td>v2.0</td><td>2026-05-01</td><td>状态机、角色、数据模型、API</td></tr>
-        <tr><td>v2.1</td><td>2026-05-01</td><td>装卸工小程序、无人值守调研</td></tr>
-        <tr><td>v3.0</td><td>2026-05-10</td><td>扫码前置装车、纸质登记单、成品库人员角色，含完整数据模型和API</td></tr>
-        <tr><td>v3.1</td><td>2026-05-09</td><td>从「分配制」改为「扫码认领制」；新增工作量统计模块D</td></tr>
-        <tr><td>v3.2</td><td>2026-05-10</td><td>多人员协作装车（逐件计工）；纸质登记单格式重设计；司机自助流转+厂区引导方案</td></tr>
-        <tr><td><strong>v4.0</strong></td><td>2026-05-13</td><td><strong>整合所有前序版本 + U8接口集成方案 + 代码审查结论 + 技术决策录</strong></td></tr>
+        <tr><td>v1.0</td><td>结算中心初稿</td></tr>
+        <tr><td>v2.0</td><td>状态机、角色、数据模型、API</td></tr>
+        <tr><td>v2.1</td><td>装卸工小程序、无人值守调研</td></tr>
+        <tr><td>v3.0</td><td>扫码前置装车、纸质登记单、成品库人员角色，含完整数据模型和API</td></tr>
+        <tr><td>v3.1</td><td>从「分配制」改为「扫码认领制」；新增工作量统计模块D</td></tr>
+        <tr><td>v3.2</td><td>多人员协作装车（逐件计工）；纸质登记单格式重设计；司机自助流转+厂区引导方案</td></tr>
+        <tr><td><strong>v4.0</strong></td><td><strong>整合所有前序版本 + U8接口集成方案 + 代码审查结论 + 技术决策录</strong></td></tr>
       </tbody>
     </table>
   </div>
@@ -587,7 +668,7 @@
 │      │                      大宗物料出库登记单                          │
 │      │                 No: 20260501-A3F7K2                           │
 │      │                                                                  │
-│ 二   │  车牌：鲁Q-XXXXX                          日期：2026-05-01       │
+│ 二   │  车牌：鲁Q-XXXXX                                                   │
 │ 维   │                                                                  │
 │ 码   │  装车路线：                                                       │
 │ 区   │  地磅①号 ─→ 成品库A(冷拔) ─→ 成品库B(热轧) ─→ 地磅①号 ─→ 结算中心│
@@ -605,7 +686,7 @@
 │      │  装车顺序：先到A库装1、3号(共18.000吨) → 再到B库装2号           │
 │      │                                                                  │
 │      │  ───────────────────────────────────────────────────────────     │
-│      │  JBC-MES大宗物料系统                          打印：2026-05-01   │
+│      │  JBC-MES大宗物料系统                                               │
 └──────┴──────────────────────────────────────────────────────────────────┘</pre>
 </div>
 
@@ -1151,6 +1232,36 @@ Header: Auth = u8_integration.auth</pre>
   </ul>
 </div>
 
+</div>
+<div class="float-nav">
+  <a href="index.html" title="返回首页">⌂</a>
+  <a href="#" title="返回顶部" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">↑</a>
+  <button class="toc-toggle" title="目录" onclick="document.querySelector('.float-toc-panel').classList.toggle('show')">≡</button>
+</div>
+<div class="float-toc-panel" onclick="this.classList.remove('show')">
+  <a href="#s1">一、项目背景与目标</a>
+  <a href="#s2">二、系统定位与设计原则</a>
+  <a href="#s3">三、角色与权限模型</a>
+  <a href="#s4">四、核心设计理念</a>
+  <a href="#s5">五、核心业务流程</a>
+  <a href="#s6">六、厂区引导方案</a>
+  <a href="#s7">七、纸质登记单设计</a>
+  <a href="#s8">八、装车路线规划</a>
+  <a href="#s9">九、状态机设计</a>
+  <a href="#s10">十、异常处理机制</a>
+  <a href="#s11">十一、功能模块清单</a>
+  <a href="#s12">十二、模块A：销售出库主流程</a>
+  <a href="#s13">十三、模块B：库提拆件子系统</a>
+  <a href="#s14">十四、模块C：订单管理完善</a>
+  <a href="#s15">十五、模块D：出库工作量统计</a>
+  <a href="#s16">十六、模块E：库位管理</a>
+  <a href="#s17">十七、数据模型设计</a>
+  <a href="#s18">十八、API接口设计</a>
+  <a href="#s19">十九、U8接口集成方案</a>
+  <a href="#s20">二十、与现有系统的衔接</a>
+  <a href="#s21">二十一、远期规划与扩展点</a>
+  <a href="#s22">二十二、专业建议与风险提示</a>
+  <a href="#s23">二十三、附录</a>
 </div>
 </body>
 </html>
