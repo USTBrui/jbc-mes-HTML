@@ -8,292 +8,371 @@
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
     <style>
         :root {
-            --bg: #f8f9fa;
-            --card-bg: #ffffff;
-            --text: #2c3e50;
-            --border: #e2e8f0;
-            --primary: #2563eb;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --purple: #8b5cf6;
-            --radius: 8px;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
-        }
+        --bg: #0b0d11;
+        --card-bg: rgba(255, 255, 255, 0.04);
+        --card-border: rgba(255, 255, 255, 0.06);
+        --text: rgba(255, 255, 255, 0.9);
+        --text-secondary: rgba(255, 255, 255, 0.5);
+        --text-tertiary: rgba(255, 255, 255, 0.3);
+        --primary: #3b82f6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --purple: #8b5cf6;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --shadow: 0 8px 32px rgba(0,0,0,0.3);
+        --shadow-lg: 0 16px 48px rgba(0,0,0,0.4);
+        --font-mono: 'Consolas', 'Monaco', 'Courier New', monospace;
+        --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+      }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.8;
-            font-size: 15px;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.8;
+        font-size: 15px;
+        min-height: 100vh;
+        position: relative;
+      }
 
+      /* 动态光晕背景 */
+      body::before, body::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::before {
+        width: 500px; height: 500px;
+        background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.20), transparent);
+        top: -10%; left: -5%;
+        animation: orbFloat1 18s var(--ease-out-expo) infinite alternate;
+      }
+      body::after {
+        width: 420px; height: 420px;
+        background: radial-gradient(circle at 70% 70%, rgba(168, 85, 247, 0.15), transparent);
+        bottom: -10%; right: -5%;
+        animation: orbFloat2 22s var(--ease-out-expo) infinite alternate;
+      }
+      @keyframes orbFloat1 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(120px, 100px) scale(1.15); }
+      }
+      @keyframes orbFloat2 {
+        0% { transform: translate(0, 0) scale(1); }
+        100% { transform: translate(-100px, -80px) scale(1.2); }
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px 100px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* 网格纹理覆盖层 */
+      .grid-overlay {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* 顶部标题卡片 - 玻璃态 */
+      .hero {
+        background: linear-gradient(135deg, rgba(30, 58, 95, 0.6), rgba(37, 99, 235, 0.3));
+        backdrop-filter: blur(20px) saturate(1.4);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 40px 36px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .hero h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+        color: #fff;
+      }
+
+      .hero .meta {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .hero .quote {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-top: 18px;
+        font-size: 13.5px;
+        line-height: 1.7;
+        color: var(--text-secondary);
+      }
+
+      /* 目录 */
+      .toc {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px) saturate(1.3);
+        -webkit-backdrop-filter: blur(16px) saturate(1.3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 28px 32px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow);
+      }
+
+      .toc h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+        color: var(--primary);
+      }
+
+      .toc ol {
+        columns: 2;
+        column-gap: 32px;
+        padding-left: 20px;
+      }
+
+      .toc li {
+        margin-bottom: 6px;
+        font-size: 14px;
+        break-inside: avoid;
+      }
+
+      .toc li::marker {
+        color: var(--text-tertiary);
+      }
+
+      .toc a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .toc a:hover {
+        color: var(--primary);
+      }
+
+      /* 章节卡片 - 玻璃态 */
+      .section {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px) saturate(1.3);
+        -webkit-backdrop-filter: blur(16px) saturate(1.3);
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius);
+        padding: 36px 40px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s var(--ease-out-expo);
+      }
+
+      .section:hover {
+        transform: translateY(-1px);
+        border-color: rgba(255,255,255,0.10);
+      }
+
+      .section h2 {
+        font-size: 22px;
+        color: var(--primary);
+        border-left: 4px solid var(--primary);
+        padding-left: 14px;
+        margin-bottom: 22px;
+        line-height: 1.4;
+      }
+
+      .section h3 {
+        font-size: 17px;
+        color: rgba(255,255,255,0.85);
+        margin: 28px 0 12px;
+      }
+
+      .section p {
+        margin-bottom: 14px;
+        color: var(--text-secondary);
+      }
+
+      .section strong {
+        color: rgba(255,255,255,0.9);
+      }
+
+      .section code {
+        background: rgba(255,255,255,0.08);
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: #f472b6;
+      }
+
+      /* 表格 */
+      .table-wrap {
+        overflow-x: auto;
+        margin: 18px 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+        min-width: 600px;
+      }
+
+      thead {
+        background: rgba(255,255,255,0.04);
+      }
+
+      thead th {
+        padding: 12px 14px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-secondary);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        white-space: nowrap;
+      }
+
+      tbody td {
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        vertical-align: top;
+        color: var(--text-secondary);
+      }
+
+      tbody tr:hover {
+        background: rgba(255,255,255,0.03);
+      }
+
+      /* 徽章 */
+      .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: 4px;
+      }
+
+      .badge-green {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+      }
+
+      .badge-red {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+      }
+
+      .badge-blue {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+      }
+
+      /* Mermaid 图表容器 */
+      .mermaid-wrap {
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: var(--radius-sm);
+        padding: 24px;
+        margin: 20px 0;
+        text-align: center;
+        overflow-x: auto;
+      }
+
+      .mermaid-wrap .mermaid {
+        display: flex;
+        justify-content: center;
+      }
+
+      .mermaid-wrap .mermaid svg {
+        max-width: 100%;
+        height: auto;
+      }
+
+      .mermaid-loading,
+      .mermaid-error {
+        padding: 20px;
+        color: var(--text-tertiary);
+        font-size: 13px;
+      }
+
+      .mermaid-error {
+        color: #dc2626;
+      }
+
+      /* 响应式 */
+      @media (max-width: 768px) {
         .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px 24px 80px;
+          padding: 16px 12px 80px;
         }
-
-        /* 顶部 */
         .hero {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-            color: #fff;
-            border-radius: 12px;
-            padding: 48px 40px;
-            margin-bottom: 40px;
-            box-shadow: var(--shadow-lg);
+          padding: 24px 18px;
+          border-radius: 16px;
         }
-
         .hero h1 {
-            font-size: 30px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+          font-size: 22px;
         }
-
-        .hero .meta {
-            display: flex;
-            gap: 24px;
-            font-size: 14px;
-            opacity: 0.85;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .hero .quote {
-            background: rgba(255, 255, 255, 0.12);
-            border-radius: 6px;
-            padding: 14px 18px;
-            margin-top: 20px;
-            font-size: 13.5px;
-            line-height: 1.7;
-        }
-
-        /* 目录 */
-        .toc {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px 32px;
-            margin-bottom: 40px;
-            box-shadow: var(--shadow);
-        }
-
-        .toc h2 {
-            font-size: 18px;
-            margin-bottom: 16px;
-            color: var(--primary);
-        }
-
-        .toc ol {
-            columns: 2;
-            column-gap: 32px;
-            padding-left: 20px;
-        }
-
-        .toc li {
-            margin-bottom: 6px;
-            font-size: 14px;
-            break-inside: avoid;
-        }
-
-        .toc a {
-            color: var(--text);
-            text-decoration: none;
-        }
-
-        .toc a:hover {
-            color: var(--primary);
-            text-decoration: underline;
-        }
-
-        /* 章节 */
         .section {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 36px 40px;
-            margin-bottom: 32px;
-            box-shadow: var(--shadow);
+          padding: 24px 18px;
         }
-
-        .section h2 {
-            font-size: 22px;
-            color: var(--primary);
-            border-left: 4px solid var(--primary);
-            padding-left: 14px;
-            margin-bottom: 24px;
-            line-height: 1.4;
+        .toc ol {
+          columns: 1;
         }
-
-        .section h3 {
-            font-size: 17px;
-            color: #34495e;
-            margin: 28px 0 12px;
+        .hero .meta {
+          flex-direction: column;
+          gap: 4px;
         }
-
-        /* 表格 */
-        .table-wrap {
-            overflow-x: auto;
-            margin: 18px 0;
+        body::before, body::after {
+          width: 250px;
+          height: 250px;
         }
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            min-width: 600px;
+      @media print {
+        body {
+          background: #fff;
+          color: #000;
         }
-
-        thead {
-            background: #f1f5f9;
+        .container {
+          max-width: 100%;
+          padding: 0;
         }
-
-        thead th {
-            padding: 12px 14px;
-            text-align: left;
-            font-weight: 600;
-            color: #475569;
-            border-bottom: 2px solid var(--border);
-            white-space: nowrap;
+        .section {
+          background: #fff;
+          box-shadow: none;
+          border: 1px solid #ccc;
+          break-inside: avoid;
         }
-
-        tbody td {
-            padding: 10px 14px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: top;
+        .hero {
+          background: #1e3a5f !important;
+          -webkit-print-color-adjust: exact;
         }
-
-        tbody tr:hover {
-            background: #f8fafc;
+        body::before, body::after, .grid-overlay {
+          display: none;
         }
-
-        code {
-            background: #f1f5f9;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            font-size: 13px;
-            color: #e11d48;
-        }
-
-        /* Mermaid 图表容器 */
-        .mermaid-wrap {
-            background: #fafbfc;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 28px 20px;
-            margin: 20px 0;
-            text-align: center;
-            overflow-x: auto;
-        }
-
-        .mermaid-wrap .mermaid {
-            display: flex;
-            justify-content: center;
-        }
-
-        .mermaid-wrap .mermaid svg {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* 加载/错误提示 */
-        .mermaid-loading,
-        .mermaid-error {
-            padding: 20px;
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .mermaid-error {
-            color: #dc2626;
-        }
-
-        /* 状态图标签 */
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-right: 4px;
-        }
-
-        .badge-green {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-red {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .badge-blue {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px 12px 40px;
-            }
-
-            .hero {
-                padding: 28px 20px;
-            }
-
-            .hero h1 {
-                font-size: 22px;
-            }
-
-            .section {
-                padding: 24px 20px;
-            }
-
-            .toc ol {
-                columns: 1;
-            }
-
-            .hero .meta {
-                flex-direction: column;
-                gap: 4px;
-            }
-        }
-
-        @media print {
-            body {
-                background: #fff;
-                color: #000;
-            }
-
-            .container {
-                max-width: 100%;
-                padding: 0;
-            }
-
-            .section {
-                box-shadow: none;
-                border: 1px solid #ccc;
-                break-inside: avoid;
-            }
-
-            .hero {
-                background: #1e3a5f !important;
-                -webkit-print-color-adjust: exact;
-            }
-        }
+      }
     /* 浮动导航 */
   .float-nav {
     position: fixed;
@@ -383,6 +462,7 @@
 </head>
 
 <body>
+    <div class="grid-overlay"></div>
     <div class="container">
 
         <div class="hero">
@@ -803,65 +883,65 @@
             <div class="mermaid-wrap">
                 <div class="mermaid">
                     sequenceDiagram
-                    participant PC as 结算中心(PC)
-                    participant MES as MES后端
-                    participant U8 as U8 ERP (9004)
-                    participant Scale as 地磅硬件(17601)
-                    participant Mini as 小程序
+                    participant PC as "结算中心(PC)"
+                    participant MES as "MES后端"
+                    participant U8 as "U8 ERP"
+                    participant Scale as "地磅硬件"
+                    participant Mini as "小程序"
 
                     Note over PC,U8: === 阶段1: 创建登记单 (PC端) ===
                     PC->>MES: 新建登记单
-                    MES->>U8: POST /api/Consignment/GetPage (callU8Api)
+                    MES->>U8: POST GetPage (callU8Api)
                     U8-->>MES: 发货单列表
-                    MES->>U8: POST /api/Consignment/GetDetail (callU8Api)
-                    U8-->>MES: 发货单详情(含明细行idlsid)
-                    MES->>MES: 生成登记单号+二维码(QRCodeUtils)+路线
+                    MES->>U8: POST GetDetail (callU8Api)
+                    U8-->>MES: 发货单详情(含明细行)
+                    MES->>MES: 生成登记单号+二维码+路线
                     MES->>MES: INSERT dzwl_outbound_header + body
                     MES->>MES: 状态: PENDING_TARE
-                    MES-->>PC: 返回登记单详情(含二维码base64)
+                    MES-->>PC: 返回登记单详情(含二维码)
                     PC->>PC: 浏览器打印 window.print()
 
                     Note over Mini,Scale: === 阶段2: 称皮重 (小程序) ===
                     Mini->>MES: 扫码获取登记单
-                    MES->>MES: 校验二维码+状态(PENDING_TARE)+角色
+                    MES->>MES: 校验二维码+状态+角色
                     MES-->>Mini: 登记单详情
-                    Mini->>MES: POST /warehouse/weigh/getWeight
+                    Mini->>MES: POST getWeight
                     MES->>Scale: POST /process_number (IWeighService)
-                    Scale-->>MES: WeighResult{success, weight}
+                    Scale-->>MES: 重量结果
                     MES-->>Mini: 实时重量
-                    Mini->>MES: PUT /warehouse/outbound/{id}/bind-tare
+                    Mini->>MES: PUT bind-tare
                     MES->>MES: 记录 tare_operator + tare_weight
                     MES->>MES: 状态: TARE_DONE
 
                     Note over Mini: === 阶段3: 装车扫码 (多人协作) ===
                     loop 逐件装车
-                    Mini->>MES: POST /warehouse/outbound/{id}/scan-certificate ({trackNumber})
+                    Mini->>MES: POST scan-certificate
                     MES->>MES: 校验(有效性/已出库/合同号)
-                    MES->>MES: INSERT dzwl_outbound_scan_record (operator_id, track_number, weight...)
-                    MES-->>Mini: {scanRecordId, productInfo}
+                    MES->>MES: INSERT scan_record
+                    MES-->>Mini: 扫描记录ID
                     end
 
                     Note over Mini,Scale,U8: === 阶段4: 称毛重+确认出库 (小程序) ===
                     Mini->>MES: 获取实时数据
                     MES->>Scale: POST /process_number (IWeighService)
-                    Scale-->>MES: WeighResult (毛重)
+                    Scale-->>MES: 毛重数据
                     MES->>MES: 计算净重+差值
-                    MES-->>Mini: {gross_weight, net_weight, weight_diff, bindList}
-                    Mini->>MES: POST /warehouse/outbound/{id}/confirm (二次确认)
+                    MES-->>Mini: 重量汇总信息
+                    Mini->>MES: POST confirm
                     MES->>MES: 净重分配 + 标记is_delivered
-                    MES->>U8: POST /api/Consignment/save (callU8Api 回写重量)
+                    MES->>U8: POST Consignment save (回写重量)
                     U8-->>MES: 保存成功
                     MES->>MES: 记录confirm_operator
                     MES->>MES: 状态: PENDING_REVIEW
                     MES-->>Mini: 确认成功
 
                     Note over PC,U8: === 阶段5: 审核 (PC端) ===
-                    PC->>MES: POST /warehouse/outbound/{id}/review
-                    MES->>MES: @Idempotent 幂等检查
-                    MES->>U8: POST /api/SaleOut/save (callU8Api)
+                    PC->>MES: POST review
+                    MES->>MES: 幂等检查
+                    MES->>U8: POST SaleOut save (callU8Api)
                     U8-->>MES: u8SaleOutId
-                    MES->>U8: POST /api/saleout/Verify?accnum=X&id=Y (9004直接调用)
-                    U8-->>MES: {success:true}
+                    MES->>U8: POST Verify (9004直接调用)
+                    U8-->>MES: 审核成功
                     MES->>MES: 状态: COMPLETED + 二维码失效
                     MES-->>PC: 审核成功 + 出门证
                 </div>
